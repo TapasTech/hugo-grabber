@@ -1,0 +1,35 @@
+{
+  "name": "Grabber",
+  "version": "0.0.0",
+  "manifest_version": 2,
+  "description": "Grabber",
+  "author": {
+    "name": "Gerald",
+    "url": "http://gerald.top"
+  },
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+  "page_action": {
+    "default_icon": {
+      "19": "images/icon19.png",
+      "38": "images/icon38.png"
+    },
+    "default_title": "Grabber"
+  },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["inject.js"]
+  }],
+  "background": {
+    "scripts": ["rules.js", "events.js"],
+    "persistent": false
+  },
+  "permissions": [
+    "tabs",
+    "<all_urls>"
+  ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+}

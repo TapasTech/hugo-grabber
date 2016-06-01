@@ -1,0 +1,27 @@
+{
+  "name": "grabber",
+  "version": "0.0.0",
+  "description": "Grab articles for Hugo Invest.",
+  "scripts": {
+    "build": "gulp"
+  },
+  "keywords": [
+    "grab",
+    "hugo",
+    "invest"
+  ],
+  "author": "Gerald <i@gerald.top>",
+  "license": "MIT",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-replace": "^0.5.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TapasTech/HugoInvestGrabber.git"
+  },
+  "bugs": {
+    "url": "https://github.com/TapasTech/HugoInvestGrabber/issues"
+  },
+  "homepage": "https://github.com/TapasTech/HugoInvestGrabber#readme"
+}
