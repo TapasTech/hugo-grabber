@@ -1,8 +1,16 @@
-function cleanHTML(html) {
+function cleanHTML(html, rule) {
   const div = document.createElement('div');
   div.innerHTML = html.trim();
-  return Promise.all([].map.call(div.querySelectorAll('img[src]'), img => {
-    return fetch(img.src)
+  const imageRule = Object.assign({}, rule._image);
+  imageRule.els = imageRule.els || 'img[src]';
+  if (typeof imageRule.els === 'string') {
+    imageRule.els = function (selector) {
+      return div => div.querySelectorAll(selector);
+    }(imageRule.els);
+  }
+  imageRule.getSrc = imageRule.getSrc || (img => img.src);
+  return Promise.all([].map.call(imageRule.els(div), img => {
+    return fetch(imageRule.getSrc(img))
     .then(res => res.blob())
     .then(blob => {
       if (blob.size > 1024 * 1024) {
@@ -27,27 +35,27 @@ function cleanHTML(html) {
   })).then(() => div.innerHTML);
 }
 
-function extract(rule) {
-  if (typeof rule === 'function') {
-    return Promise.resolve(rule());
+function extract(value, rule) {
+  if (typeof value === 'function') {
+    return Promise.resolve(value());
   } else {
-    if (typeof rule === 'string') {
-      rule = {selector: rule};
+    if (typeof value === 'string') {
+      value = {selector: value};
     }
     return Promise.resolve().then(() => {
-      const el = document.querySelector(rule.selector);
+      const el = document.querySelector(value.selector);
       if (el) {
-        return rule.type === 'text' ? el.textContent : cleanHTML(el.innerHTML);
+        return value._type === 'text' ? el.textContent : cleanHTML(el.innerHTML, rule);
       } else return '';
     });
   }
 }
 
-function grab(rules) {
+function grab(rule) {
   const article = {};
   const promises = [];
-  for (let key in rules) {
-    promises.push(extract(rules[key]).then(data => {
+  for (let key in rule) {
+    promises.push(extract(rule[key], rule).then(data => {
       article[key] = data;
     }));
   }
