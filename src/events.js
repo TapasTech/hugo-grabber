@@ -9,14 +9,14 @@ function checkTab(tab) {
 function serialize(obj) {
   if (typeof obj === 'function') {
     return obj.toString();
-  } else if (Array.isArray(obj) || typeof obj !== 'object') {
+  } else if (obj === null || typeof obj !== 'object') {
     return JSON.stringify(obj);
   } else {
-    const results = [];
-    for (let k in obj) {
-      results.push(JSON.stringify(k) + ':' + serialize(obj[k]));
-    }
-    return '{' + results.join(',') + '}';
+    return Array.isArray(obj) ? (
+      '[' + obj.map(item => serialize(item)).join(',') + ']'
+    ) : (
+      '{' + Object.keys(obj).map(key => JSON.stringify(key) + ':' + serialize(obj[key])).join(',') + '}'
+    );
   }
 }
 
