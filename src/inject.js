@@ -14,7 +14,9 @@ function cleanHTML(html) {
     .then(blob => new Promise((resolve, reject) => {
       const reader = new FileReader;
       reader.onload = function () {
-        img.src = this.result;
+        const image = new Image;
+        image.src = this.result;
+        img.parentNode.replaceChild(image, img);
         resolve();
       };
       reader.onerror = function () {
