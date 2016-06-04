@@ -54,11 +54,11 @@ function extract(value, rule) {
 function grab(rule) {
   const article = {};
   const promises = [];
-  for (let key in rule) {
+  Object.keys(rule).forEach(key => {
     promises.push(extract(rule[key], rule).then(data => {
       article[key] = data;
     }));
-  }
+  });
   Promise.all(promises).then(() => {
     chrome.runtime.sendMessage({
       cmd: 'grabbed',
