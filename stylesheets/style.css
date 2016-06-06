@@ -5,7 +5,9 @@
 body {
   max-width: 1000px;
   margin: auto;
+  padding: 0 2em;
   background-color: #efefef;
+  color: #333;
 }
 
 h1 {
@@ -18,29 +20,28 @@ h2 {
 
 img {
   width: 100%;
-  max-width: 1000px;
-  border: 12px solid #fff;
+  box-shadow: 0 0 12px rgba(0,0,0,0.4);
 }
 
-section {
-  margion: 40px auto;
+header,
+section,
+footer {
+  margin: 40px auto;
+}
+
+footer {
+  text-align: center;
+  color: #999;
 }
 
 figure {
   margin: 0 0 100px;
-  padding-left: 40px;
 }
 
-figure::after {
-  content: ' ';
-  display: block;
-  clear: both;
-}
-
-figure img {
-  float: left;
-}
-
-figure figcaption {
+figcaption {
   margin-bottom: 30px;
+}
+
+li {
+  margin-bottom: .5em;
 }
