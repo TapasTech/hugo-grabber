@@ -1,6 +1,10 @@
 function cleanHTML(html, rule) {
   const div = document.createElement('div');
   div.innerHTML = html.trim();
+  'script noscript style textarea video audio iframe object'.split(' ')
+  .forEach(tag => {
+    [].forEach.call(div.querySelectorAll(tag), el => el.remove());
+  });
   const imageRule = Object.assign({}, rule._image);
   imageRule.els = imageRule.els || 'img[src]';
   if (typeof imageRule.els === 'string') {
@@ -31,7 +35,8 @@ function cleanHTML(html, rule) {
         reject();
       };
       reader.readAsDataURL(blob);
-    }));
+    }))
+    .catch(() => {});
   })).then(() => div.innerHTML);
 }
 
@@ -55,8 +60,10 @@ function grab(rule) {
   const article = {};
   const promises = [];
   Object.keys(rule).forEach(key => {
-    promises.push(extract(rule[key], rule).then(data => {
+    key && key[0] !== '_' && promises.push(extract(rule[key], rule).then(data => {
       article[key] = data;
+    }, err => {
+      console.warn(err);
     }));
   });
   Promise.all(promises).then(() => {
