@@ -7,19 +7,21 @@ function checkTab(tab) {
 }
 
 function serialize(obj) {
-  if (Array.isArray(obj) || typeof obj !== 'object') {
+  if (typeof obj === 'function') {
+    return obj.toString();
+  } else if (obj === null || typeof obj !== 'object') {
     return JSON.stringify(obj);
   } else {
-    const results = [];
-    for (let k in obj) {
-      results.push(JSON.stringify(k) + ':' + serialize(obj[k]));
-    }
-    return '{' + results.join(',') + '}';
+    return Array.isArray(obj) ? (
+      '[' + obj.map(item => serialize(item)).join(',') + ']'
+    ) : (
+      '{' + Object.keys(obj).map(key => JSON.stringify(key) + ':' + serialize(obj[key])).join(',') + '}'
+    );
   }
 }
 
 function getScript(func, args) {
-  return '!' + func.toString() + '.apply(null,' + serialize(args || []) + ');';
+  return ';(' + func.toString() + ').apply(null,' + serialize(args || []) + ');';
 }
 
 function prepareData(article) {
