@@ -1,7 +1,5 @@
 const rules = [{
-  match: function (url) {
-    return url.startsWith('http://mp.weixin.qq.com/');
-  },
+  match: url => url.startsWith('http://mp.weixin.qq.com/s?'),
   data: {
     title: 'h2.rich_media_title',
     content: '#js_content',
