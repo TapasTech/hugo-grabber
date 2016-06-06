@@ -1,0 +1,46 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  max-width: 1000px;
+  margin: auto;
+  background-color: #efefef;
+}
+
+h1 {
+  margin: 80px auto;
+}
+
+h2 {
+  margin: 40px auto;
+}
+
+img {
+  width: 100%;
+  max-width: 1000px;
+  border: 12px solid #fff;
+}
+
+section {
+  margion: 40px auto;
+}
+
+figure {
+  margin: 0 0 100px;
+  padding-left: 40px;
+}
+
+figure::after {
+  content: ' ';
+  display: block;
+  clear: both;
+}
+
+figure img {
+  float: left;
+}
+
+figure figcaption {
+  margin-bottom: 30px;
+}
