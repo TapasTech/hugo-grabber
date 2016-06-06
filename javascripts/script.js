@@ -16,7 +16,8 @@
   }
   function renderReleases(releases) {
     var ul = $('#download-list');
-    ul.innerHTML = releases.map(function (item) {
+    var limit = 4;
+    var items = releases.slice(0, limit).map(function (item) {
       var asset = item.assets[0];
       var name = item.name || item.tag_name;
       if (asset) {
@@ -25,7 +26,9 @@
       var publishedAt = new Date(item.published_at);
       name += ' [' + publishedAt.getFullYear() + '/' + (publishedAt.getMonth() + 1) + '/' + publishedAt.getDate() + ']';
       return '<li>' + name + '</li>';
-    }).join('');
+    });
+    if (releases.length > limit) items.push('<li><a href="https://github.com/TapasTech/HugoInvestGrabber/releases" target=_blank>更多</a></li>');
+    ul.innerHTML = items.join('');
   }
   request({
     url: 'https://api.github.com/repos/TapasTech/HugoInvestGrabber/releases',
