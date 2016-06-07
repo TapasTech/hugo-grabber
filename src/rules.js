@@ -7,8 +7,8 @@ const rules = [{
     author: '#post-date+.rich_media_meta_text',
     origin_date: '#post-date',
     _image: {
-      els: 'img[data-src]',
-      getSrc: img => img.dataset.src,
+      els: 'img',
+      getSrc: img => img.dataset.src || img.src,
     },
   },
 }];
