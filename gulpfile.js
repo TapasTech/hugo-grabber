@@ -1,6 +1,7 @@
 const gulp = require('gulp');
 const replace = require('gulp-replace');
 const pkg = require('./package.json');
+const isProd = process.env.NODE_ENV === 'production';
 
 gulp.task('copy', () => (
   gulp.src([
@@ -19,12 +20,10 @@ gulp.task('manifest', () => (
 
 gulp.task('js', () => {
   const CONSTS = {
-    URL_NEW: 'https://backend-invest.test.dtcj.com/draft/columns/_new',
+    ISPROD: isProd,
   };
   return gulp.src('src/*.js')
-  .pipe(replace(/\bconst CONST_(\w+) = .*?\n/g, (match, name) => (
-    `const CONST_${name} = ${JSON.stringify(CONSTS[name] || null)};\n`
-  )))
+  .pipe(replace(/\bwindow\.CONST_(\w+)\b/g, (match, name) => JSON.stringify(CONSTS[name] || null)))
   .pipe(gulp.dest('dist'));
 });
 

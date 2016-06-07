@@ -20,12 +20,15 @@
     "default_title": "Grabber"
   },
   "content_scripts": [{
+    "matches": ["http://localhost:4002/*", "*://backend-invest.test.dtcj.com/*", "*://backend-invest.dtcj.com/*"],
+    "run_at": "document_start",
+    "js": ["common.js", "invest.js"]
+  }, {
     "matches": ["<all_urls>"],
     "js": ["inject.js"]
   }],
   "background": {
-    "scripts": ["rules.js", "events.js"],
-    "persistent": false
+    "scripts": ["common.js", "rules.js", "events.js"]
   },
   "permissions": [
     "tabs",
