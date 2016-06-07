@@ -31,9 +31,15 @@
     ul.innerHTML = items.join('');
   }
   request({
-    url: 'https://api.github.com/repos/TapasTech/HugoInvestGrabber/releases',
+    url: 'https://api.github.com/repos/TapasTech/HugoInvestGrabber/releases/latest',
     onload: function (xhr) {
-      renderReleases(JSON.parse(xhr.responseText));
+      renderReleases([JSON.parse(xhr.responseText)]);
     },
   });
+  // request({
+  //   url: 'https://api.github.com/repos/TapasTech/HugoInvestGrabber/releases',
+  //   onload: function (xhr) {
+  //     renderReleases(JSON.parse(xhr.responseText));
+  //   },
+  // });
 }();
