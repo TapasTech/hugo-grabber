@@ -1,3 +1,18 @@
+function init() {
+  function pop(key) {
+    var val = data[key];
+    delete data[key];
+    return val;
+  }
+  function set(key, val) {
+    data[key] = val;
+  }
+  if (window._hgi) return;
+  var data = {};
+  pop.set = set;
+  window._hgi = pop;
+}
+
 function inject(script) {
   const el = document.createElement('script');
   el.innerHTML = script;
@@ -11,37 +26,21 @@ function getScript(func, args) {
 }
 
 function editAs(article) {
-  const script = getScript(function (article) {
-    function getMethod(name, retry) {
-      return new Promise(function (resolve, reject) {
-        var method = window[prefix + name];
-        if (method) resolve(method);
-        else if (retry) {
-          if (retry > 0) retry --;
-          setTimeout(function () {
-            resolve(getMethod(name, retry));
-          }, 500);
-        } else {
-          reject();
-        }
-      });
-    }
-    var prefix = '//hugo//';
-    getMethod('editAs', 10).then(function (editAs) {
-      editAs('columns', article);
-    });
-  }, [article]);
-  inject(script);
+  inject(getScript(function (article) {
+    window._hgi.set('editAs:columns', article);
+  }, [article]));
 }
 
 function setNewVersion(ver) {
-  sessionStorage.setItem('newVersion', ver);
+  inject(getScript(function (ver) {
+    window._hgi.set('newVersion', ver);
+  }, [ver]));
 }
 
+inject(getScript(init));
+
 chrome.runtime.sendMessage({cmd: 'checkVersion'}, ver => {
-  if (ver && ver.name) {
-    inject(getScript(setNewVersion, [ver.name]));
-  }
+  ver && ver.name && setNewVersion(ver.name);
 });
 
 chrome.runtime.sendMessage({cmd: 'setHost', data: location.origin});
