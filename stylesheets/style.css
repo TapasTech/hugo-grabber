@@ -8,18 +8,22 @@ body {
   padding: 0 2em;
   background-color: #efefef;
   color: #333;
+  font-size: 14px;
+  font-family: "Hiragino Sans GB","Microsoft YaHei","黑体",Helvetica,Arial,Tahoma,sans-serif;
 }
 
 h1 {
-  margin: 80px auto;
+  margin: 1em auto;
+  font-size: 2rem;
 }
 
 h2 {
-  margin: 40px auto;
+  margin: 1em auto;
+  font-size: 1.5rem;
 }
 
 img {
-  width: 100%;
+  max-width: 100%;
   box-shadow: 0 0 12px rgba(0,0,0,0.4);
 }
 
@@ -34,12 +38,9 @@ footer {
   color: #999;
 }
 
-figure {
-  margin: 0 0 100px;
-}
-
-figcaption {
-  margin-bottom: 30px;
+ul,
+ol {
+  padding-left: 2em;
 }
 
 li {
