@@ -1,8 +1,8 @@
 {
-  "name": "Grabber",
+  "name": "投研快手",
   "version": "0.0.0",
   "manifest_version": 2,
-  "description": "Grabber",
+  "description": "投研系统内容抓取工具",
   "author": {
     "name": "Gerald",
     "url": "http://gerald.top"
