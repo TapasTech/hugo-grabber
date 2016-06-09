@@ -1,16 +1,21 @@
 const KEY_VERSION = 'versionInfo';
 const KEY_HOST = 'investHost';
-var versionInfo = function () {
-  var versionInfo;
+var investHost;
+readHost();
+
+var versionInfo = {};
+fetch('manifest.json')
+.then(res => res.json())
+.then(data => {
   try {
     versionInfo = JSON.parse(localStorage.getItem(KEY_VERSION));
   } catch (e) {}
   versionInfo = versionInfo || {};
-  if (versionInfo.version !== chrome.app.getDetails().version || !versionInfo.lastCheck || versionInfo.lastCheck + 3 * 60 * 60 * 1000 < Date.now()) checkUpdate();
-  return versionInfo;
-}();
-var investHost;
-readHost();
+  if (versionInfo.version !== data.version || !versionInfo.lastCheck || versionInfo.lastCheck + 3 * 60 * 60 * 1000 < Date.now()) {
+    versionInfo.version = data.version;
+    checkUpdate();
+  }
+});
 
 function readHost() {
   investHost = localStorage.getItem(KEY_HOST) || 'https://backend-invest.dtcj.com';
@@ -48,10 +53,13 @@ chrome.runtime.onMessage.addListener(function (req, src, callback) {
     chrome.tabs.create({
       url: investHost + '/draft/columns/_new',
     }, tab => {
-      chrome.tabs.executeScript(tab.id, {
-        code: 'editAs(' + serialize(article) + ')',
-        runAt: 'document_end',
-      });
+      // Firefox: tab will be at `about:blank` when created, so injection MUST be delayed
+      setTimeout(() => {
+        chrome.tabs.executeScript(tab.id, {
+          code: 'editAs(' + serialize(article) + ')',
+          runAt: 'document_start',
+        });
+      }, 200);
     });
   } else if (req.cmd === 'checkVersion') {
     callback(versionInfo);
@@ -64,17 +72,18 @@ chrome.runtime.onMessage.addListener(function (req, src, callback) {
 chrome.pageAction.onClicked.addListener(tab => {
   const rule = findRule(tab.url);
   rule && rule.data && chrome.tabs.executeScript(tab.id, {
-    code: 'grab(' + serialize(rule.data) + ')',
+    file: 'inject.js',
     runAt: 'document_start',
+  }, () => {
+    chrome.tabs.executeScript(tab.id, {
+      code: 'grab(' + serialize(rule.data) + ')',
+      runAt: 'document_start',
+    });
   });
 });
 
-chrome.windows.getAll(windows => {
-  windows.forEach(win => {
-    chrome.tabs.getAllInWindow(win.id, tabs => {
-      tabs.forEach(checkTab);
-    });
-  });
+chrome.tabs.query({}, tabs => {
+  tabs.forEach(checkTab);
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
@@ -82,7 +91,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 });
 
 function checkUpdate() {
-  const localVersion = chrome.app.getDetails().version.split('.');
+  const localVersion = versionInfo.version.split('.');
   fetch('https://api.github.com/repos/TapasTech/HugoInvestGrabber/releases/latest')
   .then(res => res.json())
   .then(data => {
@@ -102,7 +111,7 @@ function checkUpdate() {
     name: newVersion,
   }), () => ({}))
   .then(info => {
-    info.version = localVersion;
+    info.version = versionInfo.version;
     info.lastCheck = Date.now();
     versionInfo = info;
     localStorage.setItem(KEY_VERSION, JSON.stringify(info));
