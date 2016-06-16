@@ -11,10 +11,10 @@ function checkTab(tab) {
 }
 
 function checkUpdate() {
-  const localVersion = versionInfo.version.split('.');
   fetch('https://api.github.com/repos/TapasTech/HugoInvestGrabber/releases/latest')
   .then(res => res.json())
   .then(data => {
+    const localVersion = versionInfo.version.split('.');
     const remoteVersion = data.tag_name.slice(1).split('.');
     var i = 0;
     while (1) {
@@ -27,14 +27,14 @@ function checkUpdate() {
       i ++;
     }
   })
-  .then(newVersion => ({
-    name: newVersion,
-  }), () => ({}))
-  .then(info => {
-    info.version = versionInfo.version;
-    info.lastCheck = Date.now();
-    versionInfo = info;
-    localStorage.setItem(KEY_VERSION, JSON.stringify(info));
+  .then(newVersion => {
+    versionInfo.name = newVersion;
+  }, () => {
+    versionInfo.name = null;
+  })
+  .then(() => {
+    localStorage.setItem(KEY_VERSION, JSON.stringify(versionInfo));
+    setTimeout(checkUpdate, 3 * 60 * 60 * 1000);
   });
 }
 
@@ -83,10 +83,8 @@ fetch('manifest.json')
     versionInfo = JSON.parse(localStorage.getItem(KEY_VERSION));
   } catch (e) {}
   versionInfo = versionInfo || {};
-  if (versionInfo.version !== data.version || !versionInfo.lastCheck || versionInfo.lastCheck + 3 * 60 * 60 * 1000 < Date.now()) {
-    versionInfo.version = data.version;
-    checkUpdate();
-  }
+  versionInfo.version = data.version;
+  checkUpdate();
 });
 
 const findRule = function () {
