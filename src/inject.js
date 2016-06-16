@@ -55,6 +55,8 @@ window.grab = window.grab || function () {
   }
 
   function grab(rule) {
+    if (inProgress) return;
+    inProgress = true;
     const article = {};
     const promises = [];
     Object.keys(rule).forEach(key => {
@@ -69,8 +71,11 @@ window.grab = window.grab || function () {
         cmd: 'grabbed',
         article,
       });
+      inProgress = false;
     });
   }
+
+  var inProgress;
 
   return grab;
 }();

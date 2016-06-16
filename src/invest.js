@@ -44,3 +44,7 @@ chrome.runtime.sendMessage({cmd: 'checkVersion'}, ver => {
 });
 
 chrome.runtime.sendMessage({cmd: 'setHost', data: location.origin});
+
+chrome.runtime.sendMessage({cmd: 'getArticle'}, article => {
+  article && editAs(article);
+});

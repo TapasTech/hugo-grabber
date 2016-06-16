@@ -105,6 +105,32 @@ const findRule = function () {
   };
 }();
 
+const tabUpdates = function () {
+  function add(tabId, article) {
+    const item = {
+      id: tabId,
+      article,
+    };
+    hash[tabId] = item;
+    item.timer = setTimeout(cancel, 1000, item);
+  }
+  function cancel(item) {
+    if (item.timer) {
+      clearTimeout(item.timer);
+      item.timer = null;
+    }
+    delete hash[item.id];
+  }
+  function get(tabId) {
+    return hash[tabId];
+  }
+  const hash = {};
+  return {
+    add,
+    get,
+  };
+}();
+
 chrome.runtime.onMessage.addListener(function (req, src, callback) {
   if (req.cmd === 'grabbed') {
     const article = req.article;
@@ -112,20 +138,15 @@ chrome.runtime.onMessage.addListener(function (req, src, callback) {
     article.compose_organization = article.compose_organization || '第一财经｜CBN';
     chrome.tabs.create({
       url: investHost + '/draft/columns/_new',
-    }, tab => {
-      // Firefox: tab will be at `about:blank` when created, so injection MUST be delayed
-      setTimeout(() => {
-        chrome.tabs.executeScript(tab.id, {
-          code: 'editAs(' + serialize(article) + ')',
-          runAt: 'document_start',
-        });
-      }, 200);
-    });
+    }, tab => tabUpdates.add(tab.id, article));
   } else if (req.cmd === 'checkVersion') {
     callback(versionInfo);
   } else if (req.cmd === 'setHost') {
     localStorage.setItem(KEY_HOST, req.data);
     readHost();
+  } else if (req.cmd === 'getArticle') {
+    const item = tabUpdates.get(src.tab.id);
+    item && callback(item.article);
   }
 });
 
@@ -147,5 +168,10 @@ chrome.tabs.query({}, tabs => {
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  checkTab(tab);
+});
+
+// XXX fix for Chrome 48
+chrome.tabs.onCreated.addListener(tab => {
   checkTab(tab);
 });
