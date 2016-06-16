@@ -42,7 +42,10 @@ window.grab = window.grab || function () {
   }
 
   function extract(value, rule) {
-    if (typeof value === 'function') {
+    if (Array.isArray(value)) {
+      return Promise.all(value.map(item => extract(item, rule)))
+      .then(contents => contents.filter(content => content).join('\n'));
+    } else if (typeof value === 'function') {
       return Promise.resolve(value());
     } else {
       if (typeof value === 'string') {
