@@ -14,14 +14,14 @@ function checkUpdate() {
   fetch('https://api.github.com/repos/TapasTech/HugoInvestGrabber/releases/latest')
   .then(res => res.json())
   .then(data => {
-    const localVersion = versionInfo.version.split('.');
-    const remoteVersion = data.tag_name.slice(1).split('.');
+    var localVersion = versionInfo.version.split('.');
+    var remoteVersion = data.tag_name.slice(1).split('.');
     var i = 0;
     while (1) {
-      const lv = localVersion[i];
-      const rv = remoteVersion[i];
-      const nlv = +lv || 0;
-      const nrv = +rv || 0;
+      var lv = localVersion[i];
+      var rv = remoteVersion[i];
+      var nlv = +lv || 0;
+      var nrv = +rv || 0;
       if (!lv && !rv || nlv > nrv) return Promise.reject();
       if (nlv < nrv) return data.tag_name;
       i ++;
@@ -69,11 +69,11 @@ function parseRules() {
   }));
 }
 
-const KEY_VERSION = 'versionInfo';
-const KEY_HOST = 'investHost';
+var KEY_VERSION = 'versionInfo';
+var KEY_HOST = 'investHost';
 var investHost;
 readHost();
-const parsedRules = parseRules();
+var parsedRules = parseRules();
 
 var versionInfo = {};
 fetch('manifest.json')
@@ -87,8 +87,8 @@ fetch('manifest.json')
   checkUpdate();
 });
 
-const findRule = function () {
-  const cache = {};
+var findRule = function () {
+  var cache = {};
   return function (url) {
     var rule = cache[url];
     if (rule) return rule;
@@ -103,9 +103,9 @@ const findRule = function () {
   };
 }();
 
-const tabUpdates = function () {
+var tabUpdates = function () {
   function add(tabId, article) {
-    const item = {
+    var item = {
       id: tabId,
       article,
     };
@@ -122,7 +122,7 @@ const tabUpdates = function () {
   function get(tabId) {
     return hash[tabId];
   }
-  const hash = {};
+  var hash = {};
   return {
     add,
     get,
@@ -131,7 +131,7 @@ const tabUpdates = function () {
 
 chrome.runtime.onMessage.addListener(function (req, src, callback) {
   if (req.cmd === 'grabbed') {
-    const article = req.article;
+    var article = req.article;
     article.origin_url = article.origin_url || src.url.split('#')[0];
     article.compose_organization = article.compose_organization || '第一财经｜CBN';
     chrome.tabs.create({
@@ -143,13 +143,13 @@ chrome.runtime.onMessage.addListener(function (req, src, callback) {
     localStorage.setItem(KEY_HOST, req.data);
     readHost();
   } else if (req.cmd === 'getArticle') {
-    const item = tabUpdates.get(src.tab.id);
+    var item = tabUpdates.get(src.tab.id);
     item && callback(item.article);
   }
 });
 
 chrome.pageAction.onClicked.addListener(tab => {
-  const rule = findRule(tab.url);
+  var rule = findRule(tab.url);
   rule && rule.data && chrome.tabs.executeScript(tab.id, {
     file: 'inject.js',
     runAt: 'document_start',

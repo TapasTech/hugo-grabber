@@ -20,7 +20,7 @@
  *    additional options.
  *
  */
-const rules = [{
+var rules = [{
   match: url => url.startsWith('http://mp.weixin.qq.com/s?'),
   data: {
     title: 'h2.rich_media_title',
