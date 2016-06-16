@@ -110,14 +110,9 @@ var tabUpdates = function () {
       article,
     };
     hash[tabId] = item;
-    item.timer = setTimeout(cancel, 1000, item);
   }
-  function cancel(item) {
-    if (item.timer) {
-      clearTimeout(item.timer);
-      item.timer = null;
-    }
-    delete hash[item.id];
+  function remove(tabId) {
+    delete hash[tabId];
   }
   function get(tabId) {
     return hash[tabId];
@@ -126,6 +121,7 @@ var tabUpdates = function () {
   return {
     add,
     get,
+    remove,
   };
 }();
 
@@ -136,7 +132,9 @@ chrome.runtime.onMessage.addListener(function (req, src, callback) {
     article.compose_organization = article.compose_organization || '第一财经｜CBN';
     chrome.tabs.create({
       url: investHost + '/draft/columns/_new',
-    }, tab => tabUpdates.add(tab.id, article));
+    }, tab => {
+      tabUpdates.add(tab.id, article);
+    });
   } else if (req.cmd === 'checkVersion') {
     callback(versionInfo);
   } else if (req.cmd === 'setHost') {
@@ -145,6 +143,7 @@ chrome.runtime.onMessage.addListener(function (req, src, callback) {
   } else if (req.cmd === 'getArticle') {
     var item = tabUpdates.get(src.tab.id);
     item && callback(item.article);
+    tabUpdates.remove(src.tab.id);
   }
 });
 
@@ -167,6 +166,10 @@ chrome.tabs.query({}, tabs => {
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   checkTab(tab);
+});
+
+chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
+  tabUpdates.remove(tabId);
 });
 
 // XXX fix for Chrome 48
