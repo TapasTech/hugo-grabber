@@ -7,14 +7,14 @@ window.grab = window.grab || function () {
       [].forEach.call(div.querySelectorAll(tag), el => el.remove());
     });
     const imageRule = Object.assign({}, rule._image);
-    imageRule.els = imageRule.els || 'img[src]';
-    if (typeof imageRule.els === 'string') {
-      imageRule.els = function (selector) {
+    var getElements = imageRule.getElements || 'img[src]';
+    if (typeof getElements === 'string') {
+      getElements = function (selector) {
         return div => div.querySelectorAll(selector);
-      }(imageRule.els);
+      }(getElements);
     }
     imageRule.getSrc = imageRule.getSrc || (img => img.src);
-    return Promise.all([].map.call(imageRule.els(div), img => {
+    return Promise.all([].map.call(getElements(div), img => {
       return fetch(imageRule.getSrc(img))
       .then(res => res.blob())
       .then(blob => {
@@ -41,23 +41,17 @@ window.grab = window.grab || function () {
     })).then(() => div.innerHTML);
   }
 
+  function extractOne(item, rule) {
+    if (item.value) return item.value();
+    const el = document.querySelector(item.selector);
+    if (el) {
+      return item._type === 'html' ? cleanHTML(el.innerHTML, rule) : el.textContent;
+    } else return '';
+  }
+
   function extract(value, rule) {
-    if (Array.isArray(value)) {
-      return Promise.all(value.map(item => extract(item, rule)))
-      .then(contents => contents.filter(content => content).join('\n'));
-    } else if (typeof value === 'function') {
-      return Promise.resolve(value());
-    } else {
-      if (typeof value === 'string') {
-        value = {selector: value};
-      }
-      return Promise.resolve().then(() => {
-        const el = document.querySelector(value.selector);
-        if (el) {
-          return value._type === 'text' ? el.textContent : cleanHTML(el.innerHTML, rule);
-        } else return '';
-      });
-    }
+    return Promise.all(value.map(item => extractOne(item, rule)))
+    .then(contents => contents.filter(content => content).join('\n'));
   }
 
   function grab(rule) {
