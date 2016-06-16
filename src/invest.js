@@ -14,9 +14,9 @@ function init() {
 }
 
 function inject(script) {
-  const el = document.createElement('script');
+  var el = document.createElement('script');
   el.innerHTML = script;
-  const parent = document.body || document.documentElement;
+  var parent = document.body || document.documentElement;
   parent.appendChild(el);
   parent.removeChild(el);
 }
@@ -44,3 +44,7 @@ chrome.runtime.sendMessage({cmd: 'checkVersion'}, ver => {
 });
 
 chrome.runtime.sendMessage({cmd: 'setHost', data: location.origin});
+
+chrome.runtime.sendMessage({cmd: 'getArticle'}, article => {
+  article && editAs(article);
+});

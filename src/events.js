@@ -11,30 +11,30 @@ function checkTab(tab) {
 }
 
 function checkUpdate() {
-  const localVersion = versionInfo.version.split('.');
   fetch('https://api.github.com/repos/TapasTech/HugoInvestGrabber/releases/latest')
   .then(res => res.json())
   .then(data => {
-    const remoteVersion = data.tag_name.slice(1).split('.');
+    var localVersion = versionInfo.version.split('.');
+    var remoteVersion = data.tag_name.slice(1).split('.');
     var i = 0;
     while (1) {
-      const lv = localVersion[i];
-      const rv = remoteVersion[i];
-      const nlv = +lv || 0;
-      const nrv = +rv || 0;
+      var lv = localVersion[i];
+      var rv = remoteVersion[i];
+      var nlv = +lv || 0;
+      var nrv = +rv || 0;
       if (!lv && !rv || nlv > nrv) return Promise.reject();
       if (nlv < nrv) return data.tag_name;
       i ++;
     }
   })
-  .then(newVersion => ({
-    name: newVersion,
-  }), () => ({}))
-  .then(info => {
-    info.version = versionInfo.version;
-    info.lastCheck = Date.now();
-    versionInfo = info;
-    localStorage.setItem(KEY_VERSION, JSON.stringify(info));
+  .then(newVersion => {
+    versionInfo.name = newVersion;
+  }, () => {
+    versionInfo.name = null;
+  })
+  .then(() => {
+    localStorage.setItem(KEY_VERSION, JSON.stringify(versionInfo));
+    setTimeout(checkUpdate, 3 * 60 * 60 * 1000);
   });
 }
 
@@ -69,11 +69,11 @@ function parseRules() {
   }));
 }
 
-const KEY_VERSION = 'versionInfo';
-const KEY_HOST = 'investHost';
+var KEY_VERSION = 'versionInfo';
+var KEY_HOST = 'investHost';
 var investHost;
 readHost();
-const parsedRules = parseRules();
+var parsedRules = parseRules();
 
 var versionInfo = {};
 fetch('manifest.json')
@@ -83,14 +83,12 @@ fetch('manifest.json')
     versionInfo = JSON.parse(localStorage.getItem(KEY_VERSION));
   } catch (e) {}
   versionInfo = versionInfo || {};
-  if (versionInfo.version !== data.version || !versionInfo.lastCheck || versionInfo.lastCheck + 3 * 60 * 60 * 1000 < Date.now()) {
-    versionInfo.version = data.version;
-    checkUpdate();
-  }
+  versionInfo.version = data.version;
+  checkUpdate();
 });
 
-const findRule = function () {
-  const cache = {};
+var findRule = function () {
+  var cache = {};
   return function (url) {
     var rule = cache[url];
     if (rule) return rule;
@@ -105,32 +103,53 @@ const findRule = function () {
   };
 }();
 
+var tabUpdates = function () {
+  function add(tabId, article) {
+    var item = {
+      id: tabId,
+      article,
+    };
+    hash[tabId] = item;
+    item.timer = setTimeout(cancel, 1000, item);
+  }
+  function cancel(item) {
+    if (item.timer) {
+      clearTimeout(item.timer);
+      item.timer = null;
+    }
+    delete hash[item.id];
+  }
+  function get(tabId) {
+    return hash[tabId];
+  }
+  var hash = {};
+  return {
+    add,
+    get,
+  };
+}();
+
 chrome.runtime.onMessage.addListener(function (req, src, callback) {
   if (req.cmd === 'grabbed') {
-    const article = req.article;
+    var article = req.article;
     article.origin_url = article.origin_url || src.url.split('#')[0];
     article.compose_organization = article.compose_organization || '第一财经｜CBN';
     chrome.tabs.create({
       url: investHost + '/draft/columns/_new',
-    }, tab => {
-      // Firefox: tab will be at `about:blank` when created, so injection MUST be delayed
-      setTimeout(() => {
-        chrome.tabs.executeScript(tab.id, {
-          code: 'editAs(' + serialize(article) + ')',
-          runAt: 'document_start',
-        });
-      }, 200);
-    });
+    }, tab => tabUpdates.add(tab.id, article));
   } else if (req.cmd === 'checkVersion') {
     callback(versionInfo);
   } else if (req.cmd === 'setHost') {
     localStorage.setItem(KEY_HOST, req.data);
     readHost();
+  } else if (req.cmd === 'getArticle') {
+    var item = tabUpdates.get(src.tab.id);
+    item && callback(item.article);
   }
 });
 
 chrome.pageAction.onClicked.addListener(tab => {
-  const rule = findRule(tab.url);
+  var rule = findRule(tab.url);
   rule && rule.data && chrome.tabs.executeScript(tab.id, {
     file: 'inject.js',
     runAt: 'document_start',
@@ -148,4 +167,9 @@ chrome.tabs.query({}, tabs => {
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   checkTab(tab);
+});
+
+// XXX fix for Chrome 48
+chrome.tabs.onActivated.addListener(activeInfo => {
+  chrome.tabs.get(activeInfo.tabId, tab => checkTab(tab));
 });

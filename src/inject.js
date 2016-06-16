@@ -1,12 +1,12 @@
 window.grab = window.grab || function () {
   function cleanHTML(html, rule) {
-    const div = document.createElement('div');
+    var div = document.createElement('div');
     div.innerHTML = html.trim();
     'script noscript style textarea video audio iframe object'.split(' ')
     .forEach(tag => {
       [].forEach.call(div.querySelectorAll(tag), el => el.remove());
     });
-    const imageRule = Object.assign({}, rule._image);
+    var imageRule = Object.assign({}, rule._image);
     var getElements = imageRule.getElements || 'img[src]';
     if (typeof getElements === 'string') {
       getElements = function (selector) {
@@ -25,9 +25,9 @@ window.grab = window.grab || function () {
         return blob;
       })
       .then(blob => new Promise((resolve, reject) => {
-        const reader = new FileReader;
+        var reader = new FileReader;
         reader.onload = function () {
-          const image = new Image;
+          var image = new Image;
           image.src = this.result;
           img.parentNode.replaceChild(image, img);
           resolve();
@@ -43,7 +43,7 @@ window.grab = window.grab || function () {
 
   function extractOne(item, rule) {
     if (item.value) return item.value();
-    const el = document.querySelector(item.selector);
+    var el = document.querySelector(item.selector);
     if (el) {
       return item._type === 'html' ? cleanHTML(el.innerHTML, rule) : el.textContent;
     } else return '';
@@ -55,8 +55,10 @@ window.grab = window.grab || function () {
   }
 
   function grab(rule) {
-    const article = {};
-    const promises = [];
+    if (inProgress) return;
+    inProgress = true;
+    var article = {};
+    var promises = [];
     Object.keys(rule).forEach(key => {
       key && key[0] !== '_' && promises.push(extract(rule[key], rule).then(data => {
         article[key] = data;
@@ -69,8 +71,11 @@ window.grab = window.grab || function () {
         cmd: 'grabbed',
         article,
       });
+      inProgress = false;
     });
   }
+
+  var inProgress;
 
   return grab;
 }();
