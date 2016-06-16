@@ -6,7 +6,7 @@ const isProd = process.env.NODE_ENV === 'production';
 
 gulp.task('copy', () => (
   gulp.src([
-    'src/_locales/**',
+    // 'src/_locales/**',
     'src/images/**',
   ], {base: 'src'})
   .pipe(gulp.dest('dist'))
