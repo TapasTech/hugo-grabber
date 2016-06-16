@@ -170,6 +170,6 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 });
 
 // XXX fix for Chrome 48
-chrome.tabs.onCreated.addListener(tab => {
-  checkTab(tab);
+chrome.tabs.onActivated.addListener(activeInfo => {
+  chrome.tabs.get(activeInfo.tabId, tab => checkTab(tab));
 });
