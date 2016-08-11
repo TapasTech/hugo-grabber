@@ -45,7 +45,7 @@ window.grab = window.grab || function () {
     if (item.value) return item.value();
     var el = document.querySelector(item.selector);
     if (el) {
-      return item._type === 'html' ? cleanHTML(el.innerHTML, rule) : el.textContent;
+      return item._type === 'html' ? cleanHTML(el.innerHTML, rule) : el.textContent.trim();
     } else return '';
   }
 
