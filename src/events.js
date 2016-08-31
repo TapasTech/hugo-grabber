@@ -10,33 +10,33 @@ function checkTab(tab) {
   }
 }
 
-function checkUpdate() {
-  fetch('https://api.github.com/repos/TapasTech/HugoInvestGrabber/releases/latest')
-  .then(res => res.json())
-  .then(data => {
-    var localVersion = versionInfo.version.split('.');
-    var remoteVersion = data.tag_name.slice(1).split('.');
-    var i = 0;
-    while (1) {
-      var lv = localVersion[i];
-      var rv = remoteVersion[i];
-      var nlv = +lv || 0;
-      var nrv = +rv || 0;
-      if (!lv && !rv || nlv > nrv) return Promise.reject();
-      if (nlv < nrv) return data.tag_name;
-      i ++;
-    }
-  })
-  .then(newVersion => {
-    versionInfo.name = newVersion;
-  }, () => {
-    versionInfo.name = null;
-  })
-  .then(() => {
-    localStorage.setItem(KEY_VERSION, JSON.stringify(versionInfo));
-    setTimeout(checkUpdate, 3 * 60 * 60 * 1000);
-  });
-}
+// function checkUpdate() {
+//   fetch('https://api.github.com/repos/TapasTech/HugoInvestGrabber/releases/latest')
+//   .then(res => res.json())
+//   .then(data => {
+//     var localVersion = versionInfo.version.split('.');
+//     var remoteVersion = data.tag_name.slice(1).split('.');
+//     var i = 0;
+//     while (1) {
+//       var lv = localVersion[i];
+//       var rv = remoteVersion[i];
+//       var nlv = +lv || 0;
+//       var nrv = +rv || 0;
+//       if (!lv && !rv || nlv > nrv) return Promise.reject();
+//       if (nlv < nrv) return data.tag_name;
+//       i ++;
+//     }
+//   })
+//   .then(newVersion => {
+//     versionInfo.name = newVersion;
+//   }, () => {
+//     versionInfo.name = null;
+//   })
+//   .then(() => {
+//     localStorage.setItem(KEY_VERSION, JSON.stringify(versionInfo));
+//     setTimeout(checkUpdate, 3 * 60 * 60 * 1000);
+//   });
+// }
 
 function parseRules() {
   return rules.map(rule => ({
@@ -84,7 +84,7 @@ fetch('manifest.json')
   } catch (e) {}
   versionInfo = versionInfo || {};
   versionInfo.version = data.version;
-  checkUpdate();
+  // checkUpdate();
 });
 
 var findRule = function () {
