@@ -21,7 +21,7 @@
  *
  */
 var rules = [{
-  match: url => url.startsWith('http://mp.weixin.qq.com/s?'),
+  match: url => /^https?:\/\/mp\.weixin\.qq\.com\/s\?/.test(url),
   data: {
     title: 'h2.rich_media_title',
     content: {

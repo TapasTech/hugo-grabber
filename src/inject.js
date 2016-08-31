@@ -45,7 +45,7 @@ window.grab = window.grab || function () {
     if (item.value) return item.value();
     var el = document.querySelector(item.selector);
     if (el) {
-      return item._type === 'html' ? cleanHTML(el.innerHTML, rule) : el.textContent;
+      return item._type === 'html' ? cleanHTML(el.innerHTML, rule) : el.textContent.trim();
     } else return '';
   }
 
@@ -56,6 +56,7 @@ window.grab = window.grab || function () {
 
   function grab(rule) {
     if (inProgress) return;
+    var finish = showHint();
     inProgress = true;
     var article = {};
     var promises = [];
@@ -72,7 +73,29 @@ window.grab = window.grab || function () {
         article,
       });
       inProgress = false;
+      finish();
     });
+  }
+
+  function showHint() {
+    var div = document.createElement('div');
+    div.setAttribute('style', [
+      'position: fixed',
+      'top: 1em',
+      'right: 1em',
+      'padding: 1em',
+      'background: rgba(0,0,0,.6)',
+      'color: white',
+      'font-size: 14px',
+      'font-weight: 300',
+      'border-radius: .5em',
+    ].join(';'));
+    div.innerHTML = '正在抓取...';
+    document.body.appendChild(div);
+    return function () {
+      div.innerHTML = '抓取完成';
+      setTimeout(() => div.remove(), 3000);
+    };
   }
 
   var inProgress;

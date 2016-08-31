@@ -10,33 +10,33 @@ function checkTab(tab) {
   }
 }
 
-function checkUpdate() {
-  fetch('https://api.github.com/repos/TapasTech/HugoInvestGrabber/releases/latest')
-  .then(res => res.json())
-  .then(data => {
-    var localVersion = versionInfo.version.split('.');
-    var remoteVersion = data.tag_name.slice(1).split('.');
-    var i = 0;
-    while (1) {
-      var lv = localVersion[i];
-      var rv = remoteVersion[i];
-      var nlv = +lv || 0;
-      var nrv = +rv || 0;
-      if (!lv && !rv || nlv > nrv) return Promise.reject();
-      if (nlv < nrv) return data.tag_name;
-      i ++;
-    }
-  })
-  .then(newVersion => {
-    versionInfo.name = newVersion;
-  }, () => {
-    versionInfo.name = null;
-  })
-  .then(() => {
-    localStorage.setItem(KEY_VERSION, JSON.stringify(versionInfo));
-    setTimeout(checkUpdate, 3 * 60 * 60 * 1000);
-  });
-}
+// function checkUpdate() {
+//   fetch('https://api.github.com/repos/TapasTech/HugoInvestGrabber/releases/latest')
+//   .then(res => res.json())
+//   .then(data => {
+//     var localVersion = versionInfo.version.split('.');
+//     var remoteVersion = data.tag_name.slice(1).split('.');
+//     var i = 0;
+//     while (1) {
+//       var lv = localVersion[i];
+//       var rv = remoteVersion[i];
+//       var nlv = +lv || 0;
+//       var nrv = +rv || 0;
+//       if (!lv && !rv || nlv > nrv) return Promise.reject();
+//       if (nlv < nrv) return data.tag_name;
+//       i ++;
+//     }
+//   })
+//   .then(newVersion => {
+//     versionInfo.name = newVersion;
+//   }, () => {
+//     versionInfo.name = null;
+//   })
+//   .then(() => {
+//     localStorage.setItem(KEY_VERSION, JSON.stringify(versionInfo));
+//     setTimeout(checkUpdate, 3 * 60 * 60 * 1000);
+//   });
+// }
 
 function parseRules() {
   return rules.map(rule => ({
@@ -84,7 +84,7 @@ fetch('manifest.json')
   } catch (e) {}
   versionInfo = versionInfo || {};
   versionInfo.version = data.version;
-  checkUpdate();
+  // checkUpdate();
 });
 
 var findRule = function () {
@@ -110,14 +110,9 @@ var tabUpdates = function () {
       article,
     };
     hash[tabId] = item;
-    item.timer = setTimeout(cancel, 1000, item);
   }
-  function cancel(item) {
-    if (item.timer) {
-      clearTimeout(item.timer);
-      item.timer = null;
-    }
-    delete hash[item.id];
+  function remove(tabId) {
+    delete hash[tabId];
   }
   function get(tabId) {
     return hash[tabId];
@@ -126,6 +121,7 @@ var tabUpdates = function () {
   return {
     add,
     get,
+    remove,
   };
 }();
 
@@ -136,7 +132,9 @@ chrome.runtime.onMessage.addListener(function (req, src, callback) {
     article.compose_organization = article.compose_organization || '第一财经｜CBN';
     chrome.tabs.create({
       url: investHost + '/draft/columns/_new',
-    }, tab => tabUpdates.add(tab.id, article));
+    }, tab => {
+      tabUpdates.add(tab.id, article);
+    });
   } else if (req.cmd === 'checkVersion') {
     callback(versionInfo);
   } else if (req.cmd === 'setHost') {
@@ -145,6 +143,7 @@ chrome.runtime.onMessage.addListener(function (req, src, callback) {
   } else if (req.cmd === 'getArticle') {
     var item = tabUpdates.get(src.tab.id);
     item && callback(item.article);
+    tabUpdates.remove(src.tab.id);
   }
 });
 
@@ -167,6 +166,10 @@ chrome.tabs.query({}, tabs => {
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   checkTab(tab);
+});
+
+chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
+  tabUpdates.remove(tabId);
 });
 
 // XXX fix for Chrome 48
