@@ -1,6 +1,6 @@
 {
   "name": "grabber",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Grab articles for Hugo Invest.",
   "scripts": {
     "build": "gulp"
