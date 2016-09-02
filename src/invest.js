@@ -31,16 +31,17 @@ function editAs(article) {
   }, [article]));
 }
 
-function setNewVersion(ver) {
-  inject(getScript(function (ver) {
-    window._hgi.set('newVersion', ver);
+function setVersion(ver) {
+  ver && inject(getScript(function (ver) {
+    window._hgi.set('version', ver.version);
+    ver.name && window._hgi.set('newVersion', ver.name);
   }, [ver]));
 }
 
 inject(getScript(init));
 
 chrome.runtime.sendMessage({cmd: 'checkVersion'}, ver => {
-  ver && ver.name && setNewVersion(ver.name);
+  ver && setVersion(ver);
 });
 
 chrome.runtime.sendMessage({cmd: 'setHost', data: location.origin});
