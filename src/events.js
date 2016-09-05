@@ -38,11 +38,13 @@ var KEY_VERSION = 'versionInfo';
 
 var versionInfo = {};
 fetch('manifest.json')
-.then(res => res.json())
-.then(data => {
+.then(function (res) {return res.json();})
+.then(function (data) {
   try {
     versionInfo = JSON.parse(localStorage.getItem(KEY_VERSION));
-  } catch (e) {}
+  } catch (e) {
+    // ignore
+  }
   versionInfo = versionInfo || {};
   versionInfo.version = data.version;
   // checkUpdate();
@@ -53,10 +55,12 @@ var findRule = function () {
   return function (url) {
     var rule = cache[url];
     if (rule) return rule;
-    rule = parsedRules.find(rule => !rule.match || rule.match(url));
+    rule = window.rules.find(function (rule) {
+      return !rule.match || rule.match(url);
+    });
     if (rule) {
       cache[url] = rule;
-      setTimeout(() => {
+      setTimeout(function () {
         delete cache[url];
       }, 3000);
     }
@@ -67,8 +71,8 @@ var findRule = function () {
 var tabUpdates = function () {
   function add(tabId, article) {
     var item = {
+      article: article,
       id: tabId,
-      article,
     };
     hash[tabId] = item;
   }
@@ -80,9 +84,9 @@ var tabUpdates = function () {
   }
   var hash = {};
   return {
-    add,
-    get,
-    remove,
+    add: add,
+    get: get,
+    remove: remove,
   };
 }();
 
@@ -90,7 +94,7 @@ chrome.runtime.onMessage.addListener(function (req, src, callback) {
   if (req.cmd === 'grabbed') {
     chrome.tabs.create({
       url: req.open,
-    }, tab => {
+    }, function (tab) {
       tabUpdates.add(tab.id, req.article);
     });
   } else if (req.cmd === 'checkVersion') {
@@ -102,32 +106,32 @@ chrome.runtime.onMessage.addListener(function (req, src, callback) {
   }
 });
 
-chrome.pageAction.onClicked.addListener(tab => {
+chrome.pageAction.onClicked.addListener(function (tab) {
   var rule = findRule(tab.url);
   rule && rule.data && chrome.tabs.executeScript(tab.id, {
     file: 'inject.js',
     runAt: 'document_start',
-  }, () => {
+  }, function () {
     chrome.tabs.executeScript(tab.id, {
-      code: 'grab(' + serialize(rule) + ')',
+      code: 'grab(' + window.serialize(rule) + ')',
       runAt: 'document_start',
     });
   });
 });
 
-chrome.tabs.query({}, tabs => {
+chrome.tabs.query({}, function (tabs) {
   tabs.forEach(checkTab);
 });
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+chrome.tabs.onUpdated.addListener(function (_tabId, _changeInfo, tab) {
   checkTab(tab);
 });
 
-chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
+chrome.tabs.onRemoved.addListener(function (tabId, _removeInfo) {
   tabUpdates.remove(tabId);
 });
 
 // XXX fix for Chrome 48
-chrome.tabs.onActivated.addListener(activeInfo => {
-  chrome.tabs.get(activeInfo.tabId, tab => checkTab(tab));
+chrome.tabs.onActivated.addListener(function (activeInfo) {
+  chrome.tabs.get(activeInfo.tabId, function (tab) {checkTab(tab);});
 });

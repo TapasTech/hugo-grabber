@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "Grab articles for Hugo Invest.",
   "scripts": {
+    "lint": "gulp eslint",
     "build": "gulp"
   },
   "keywords": [
@@ -14,7 +15,8 @@
   "license": "MIT",
   "devDependencies": {
     "gulp": "^3.9.1",
-    "gulp-replace": "^0.5.4"
+    "gulp-eslint": "^3.0.1",
+    "gulp-uglify": "^2.0.0"
   },
   "repository": {
     "type": "git",

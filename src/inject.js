@@ -2,7 +2,7 @@ window.grab = window.grab || function () {
   function cleanHTML(html, meta) {
     var imageRule = Object.assign({
       el: 'img[src]',
-      src: img => img.src,
+      src: function (img) {return img.src;},
       maxSize: 1024 * 1024,
     }, meta.image);
     var div = document.createElement('div');
@@ -18,30 +18,32 @@ window.grab = window.grab || function () {
       'object',
     ];
     if (!imageRule.el) ignoreTags.push('img');
-    ignoreTags.forEach(tag => {
-      Array.prototype.forEach.call(div.querySelectorAll(tag), el => el.remove());
+    ignoreTags.forEach(function (tag) {
+      Array.prototype.forEach.call(div.querySelectorAll(tag), function (el) {el.remove();});
     });
     if (!imageRule.el) return div.innerHTML;
     var els = typeof imageRule.el === 'string' ? div.querySelectorAll(imageRule.el) : imageRule.el(div);
-    return Promise.all(Array.prototype.map.call(els, img => {
+    return Promise.all(Array.prototype.map.call(els, function (img) {
       return fetch(imageRule.src(img))
-      .then(res => res.blob())
-      .then(blob => blob.size > imageRule.maxSize ? Promise.reject() : blob)
-      .then(blob => new Promise((resolve, reject) => {
-        var reader = new FileReader;
-        reader.onload = function () {
-          var image = new Image;
-          image.src = this.result;
-          img.parentNode.replaceChild(image, img);
-          resolve();
-        };
-        reader.onerror = function () {
-          reject();
-        };
-        reader.readAsDataURL(blob);
-      }))
-      .catch(() => img.remove());
-    })).then(() => div.innerHTML);
+      .then(function (res) {return res.blob();})
+      .then(function (blob) {return blob.size > imageRule.maxSize ? Promise.reject() : blob;})
+      .then(function (blob) {
+        return new Promise(function (resolve, reject) {
+          var reader = new FileReader;
+          reader.onload = function () {
+            var image = new Image;
+            image.src = this.result;
+            img.parentNode.replaceChild(image, img);
+            resolve();
+          };
+          reader.onerror = function () {
+            reject();
+          };
+          reader.readAsDataURL(blob);
+        });
+      })
+      .catch(function () {img.remove();});
+    })).then(function () {return div.innerHTML;});
   }
 
   function extractOne(item, meta) {
@@ -55,8 +57,10 @@ window.grab = window.grab || function () {
   }
 
   function extract(group, meta) {
-    return Promise.all(group.map(item => extractOne(item, meta)))
-    .then(contents => contents.filter(content => content).join('\n'));
+    return Promise.all(group.map(function (item) {return extractOne(item, meta);}))
+    .then(function (contents) {
+      return contents.filter(function (content) {return content;}).join('\n');
+    });
   }
 
   function grab(rule) {
@@ -65,19 +69,29 @@ window.grab = window.grab || function () {
     var meta = rule.meta;
     var data = rule.data;
     inProgress = true;
-    var promises = Object.keys(data).filter(key => key[0] !== '_')
-    .map(key => extract(data[key], meta).then(data => [key, data], err => console.warn(err)));
+    var promises = Object.keys(data)
+    .filter(function (key) {return key[0] !== '_';})
+    .map(function (key) {
+      return extract(data[key], meta)
+      .then(function (data) {
+        return [key, data];
+      }, function (err) {
+        console.warn(err);
+      });
+    });
     Promise.all(promises)
-    .then(pairs => pairs.reduce((res, item) => {
-      res[item[0]] = item[1];
-      return res;
-    }, {}))
-    .then(article => {
+    .then(function (pairs) {
+      return pairs.reduce(function (res, item) {
+        res[item[0]] = item[1];
+        return res;
+      }, {});
+    })
+    .then(function (article) {
       if (meta.transform) article = meta.transform(article) || article;
       chrome.runtime.sendMessage({
         cmd: 'grabbed',
         open: meta.open,
-        article,
+        article: article,
       });
       inProgress = false;
       finish();
@@ -101,7 +115,7 @@ window.grab = window.grab || function () {
     document.body.appendChild(div);
     return function () {
       div.innerHTML = '抓取完成';
-      setTimeout(() => div.remove(), 3000);
+      setTimeout(function () {div.remove();}, 3000);
     };
   }
 

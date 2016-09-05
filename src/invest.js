@@ -22,7 +22,7 @@ function inject(script) {
 }
 
 function getScript(func, args) {
-  return ';(' + func.toString() + ').apply(null,' + serialize(args || []) + ');';
+  return ';(' + func.toString() + ').apply(null,' + window.serialize(args || []) + ');';
 }
 
 function editAs(article) {
@@ -40,12 +40,12 @@ function setVersion(ver) {
 
 inject(getScript(init));
 
-chrome.runtime.sendMessage({cmd: 'checkVersion'}, ver => {
+chrome.runtime.sendMessage({cmd: 'checkVersion'}, function (ver) {
   ver && setVersion(ver);
 });
 
 chrome.runtime.sendMessage({cmd: 'setHost', data: location.origin});
 
-chrome.runtime.sendMessage({cmd: 'getArticle'}, article => {
+chrome.runtime.sendMessage({cmd: 'getArticle'}, function (article) {
   article && editAs(article);
 });

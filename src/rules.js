@@ -29,12 +29,12 @@
 *
 */
 
-var parsedRules = function parseRules(rules) {
+window.rules = function parseRules(rules) {
   // proto MUST be assigned to the object to make it serializable
   function normalizeRule(rule, proto) {
     // type 1 and 2
     if (Array.isArray(rule)) {
-      return rule.reduce((res, item) => {
+      return rule.reduce(function (res, item) {
         res = res.concat(normalizeRule(item, proto));
         return res;
       }, []);
@@ -47,20 +47,22 @@ var parsedRules = function parseRules(rules) {
     var meta = Object.assign({}, rule, {data: null}, proto);
     return Array.isArray(rule.data) ? normalizeRule(rule.data, meta) : [meta];
   }
-  return rules.map(rule => ({
-    match: rule.match,
-    meta: rule.meta,
-    data: Object.keys(rule.data).reduce((res, key) => {
-      var value = rule.data[key];
-      res[key] = key.startsWith('_') ? value : normalizeRule(value);
-      return res;
-    }, {}),
-  }));
+  return rules.map(function (rule) {
+    return {
+      match: rule.match,
+      meta: rule.meta,
+      data: Object.keys(rule.data).reduce(function (res, key) {
+        var value = rule.data[key];
+        res[key] = key.startsWith('_') ? value : normalizeRule(value);
+        return res;
+      }, {}),
+    };
+  });
 }([{
-  match: url => /^https?:\/\/mp\.weixin\.qq\.com\/s\?/.test(url),
+  match: function (url) {return /^https?:\/\/mp\.weixin\.qq\.com\/s\?/.test(url);},
   meta: {
     open: 'https://backend-invest.dtcj.com/draft/columns/_new',
-    transform: article => {
+    transform: function (article) {
       if (~[
         '无马金融',
         'A股探秘',
@@ -73,7 +75,7 @@ var parsedRules = function parseRules(rules) {
     },
     image: {
       el: 'img',
-      src: img => img.dataset.src || img.src,
+      src: function (img) {return img.dataset.src || img.src;},
       maxSize: 1024 * 1024,
     },
   },
@@ -85,10 +87,10 @@ var parsedRules = function parseRules(rules) {
     },
     origin_website: '#post-user',
     origin_url: {
-      value: window => window.location.href.split('#')[0],
+      value: function (window) {return window.location.href.split('#')[0];},
     },
     compose_organization: {
-      value: () => '第一财经｜CBN',
+      value: function () {return '第一财经｜CBN';},
     },
     author: '#post-date+.rich_media_meta_text',
     origin_date: '#post-date',
