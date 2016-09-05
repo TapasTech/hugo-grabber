@@ -10,11 +10,13 @@ gulp.task('copy', () => (
     // 'src/_locales/**',
     'src/images/**',
     'src/**/*.html',
+    'src/**/*.min.js',
   ], {base: 'src'})
   .pipe(gulp.dest('dist'))
 ));
 
-gulp.task('manifest', () => new Promise((resolve, reject) => {
+// make `manifest` dependent on `copy` so that the dest directory exists
+gulp.task('manifest', ['copy'], () => new Promise((resolve, reject) => {
   fs.writeFile('dist/manifest.json', JSON.stringify(Object.assign({}, manifest, {
     version: pkg.version,
     page_action: Object.assign({}, manifest.page_action, {default_title: manifest.name}),
@@ -22,7 +24,10 @@ gulp.task('manifest', () => new Promise((resolve, reject) => {
 }));
 
 gulp.task('js', () => {
-  const stream = gulp.src('src/**/*.js')
+  const stream = gulp.src([
+    'src/**/*.js',
+    '!src/**/*.min.js',
+  ])
   .pipe(uglify().on('error', e => {
     console.log(e);
   }))
@@ -31,7 +36,10 @@ gulp.task('js', () => {
 });
 
 gulp.task('eslint', () => {
-  return gulp.src('src/**/*.js')
+  return gulp.src([
+    'src/**/*.js',
+    '!src/**/*.min.js',
+  ])
   .pipe(eslint())
   .pipe(eslint.format())
   .pipe(eslint.failAfterError());

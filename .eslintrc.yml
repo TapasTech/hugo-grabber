@@ -29,5 +29,6 @@ env:
 
 globals:
   chrome: true
+  Vue: true
 
 extends: 'eslint:recommended'

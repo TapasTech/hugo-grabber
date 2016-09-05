@@ -11,7 +11,7 @@ new Vue({
     }, function (list) {
       _this.list = list;
     });
-    chrome.runtime.onMessage.addListener(function (req, src, callback) {
+    chrome.runtime.onMessage.addListener(function (req, _src, _callback) {
       if (req.cmd === 'updateItems') {
         req.data.forEach(function (item) {
           var i = _this.list.findIndex(function (listItem) {
@@ -36,6 +36,7 @@ new Vue({
       });
     },
     remove: function (item) {
+      confirm('Do you really want to remove it?') &&
       chrome.runtime.sendMessage({
         cmd: 'removeRule',
         data: item.id,
