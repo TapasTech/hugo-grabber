@@ -4,7 +4,7 @@ new Vue({
     url: null,
     list: [],
   },
-  mounted() {
+  mounted: function () {
     var _this = this;
     chrome.runtime.sendMessage({
       cmd: 'getRuleList',
@@ -27,19 +27,19 @@ new Vue({
     });
   },
   methods: {
-    refresh(item) {
+    refresh: function (item) {
       chrome.runtime.sendMessage({
         cmd: 'updateRule',
         data: item.id,
       });
     },
-    remove(item) {
+    remove: function (item) {
       chrome.runtime.sendMessage({
         cmd: 'removeRule',
         data: item.id,
       });
     },
-    subscribe() {
+    subscribe: function () {
       var _this = this;
       chrome.runtime.sendMessage({
         cmd: 'subscribe',
