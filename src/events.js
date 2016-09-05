@@ -133,6 +133,7 @@
         saveData(id, data);
         state.checking = null;
         updateState(id);
+        updateTabState();
       });
     }
     function update(id) {
@@ -165,6 +166,7 @@
         meta.list.splice(i, 1);
         saveMeta();
       }
+      updateTabState();
     }
     function loadAll() {
       return meta.list.reduce(function (res, item) {
@@ -194,7 +196,20 @@
       var timer;
       return function (id) {
         toUpdate.indexOf(id) < 0 && toUpdate.push(id);
-        timer = setTimeout(update);
+        if (!timer) timer = setTimeout(update);
+      };
+    }();
+    var updateTabState = function () {
+      function update() {
+        timer = null;
+        rules = loadAll();
+        chrome.tabs.query({}, function (tabs) {
+          tabs.forEach(checkTab);
+        });
+      }
+      var timer;
+      return function () {
+        if (!timer) timer = setTimeout(update);
       };
     }();
     var KEY_RULES = 'rules';
@@ -283,10 +298,6 @@
         runAt: 'document_start',
       });
     });
-  });
-
-  chrome.tabs.query({}, function (tabs) {
-    tabs.forEach(checkTab);
   });
 
   chrome.tabs.onUpdated.addListener(function (_tabId, _changeInfo, tab) {
