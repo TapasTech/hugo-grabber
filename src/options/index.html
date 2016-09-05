@@ -31,6 +31,9 @@
     .item-buttons {
       width: 8rem;
     }
+    .text-gray {
+      color: gray;
+    }
   </style>
   <script src="vue.min.js"></script>
 </head>
@@ -38,7 +41,10 @@
   <h1>Grabber Options</h1>
   <div id="app">
     <div class="item" v-for="item in list">
-      <a class="item-link" :href="item.url" target="_blank" v-text="item.url"></a>
+      <div class="item-link">
+        <a :href="item.url" target="_blank" v-text="item.url"></a>
+        <div class="text-gray" v-text="lastCheck(item)"></div>
+      </div>
       <div class="item-buttons">
         <button @click="refresh(item)" :disabled="item.checking">Refresh</button>
         <button @click="remove(item)">Remove</button>
@@ -47,7 +53,7 @@
     <form class="item" @submit.prevent="subscribe">
       <input class="item-link" type="url" v-model="url" placeholder="Subscribe a new URL...">
       <div class="item-buttons">
-        <button type="submit">Subscribe</button>
+        <button type="submit" :disabled="!url">Subscribe</button>
       </div>
     </form>
   </div>

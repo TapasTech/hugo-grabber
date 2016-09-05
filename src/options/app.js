@@ -43,12 +43,17 @@ new Vue({
     },
     subscribe: function () {
       var _this = this;
-      chrome.runtime.sendMessage({
+      _this.url && chrome.runtime.sendMessage({
         cmd: 'subscribe',
         data: _this.url,
       }, function () {
         _this.url = null;
       });
+    },
+    lastCheck: function (item) {
+      if (!item.lastCheck) return;
+      var d = new Date(item.lastCheck);
+      return 'Last updated at: ' + d.toLocaleTimeString();
     },
   },
 });
