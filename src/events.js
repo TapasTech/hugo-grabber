@@ -1,7 +1,3 @@
-function readHost() {
-  investHost = localStorage.getItem(KEY_HOST) || 'https://backend-invest.dtcj.com';
-}
-
 function checkTab(tab) {
   if (findRule(tab.url)) {
     chrome.pageAction.show(tab.id);
@@ -38,42 +34,7 @@ function checkTab(tab) {
 //   });
 // }
 
-function parseRules() {
-  return rules.map(rule => ({
-    match: rule.match,
-    data: Object.keys(rule.data).reduce((res, key) => {
-      var value = rule.data[key];
-      if (key.startsWith('_')) {
-        res[key] = value;
-      } else {
-        var meta, data;
-        if (Array.isArray(value)) {
-          data = value;
-        } else if (typeof value === 'object' && value._data) {
-          meta = Object.keys(value).reduce((meta, key) => {
-            if (key !== '_data') meta[key] = value[key];
-            return meta;
-          }, {});
-          data = value._data;
-        } else {
-          data = [value];
-        }
-        res[key] = data.map(item => {
-          if (typeof item === 'string') item = {selector: item};
-          else if (typeof item === 'function') item = {value: item};
-          return Object.assign(item, meta);
-        });
-      }
-      return res;
-    }, {}),
-  }));
-}
-
 var KEY_VERSION = 'versionInfo';
-var KEY_HOST = 'investHost';
-var investHost;
-readHost();
-var parsedRules = parseRules();
 
 var versionInfo = {};
 fetch('manifest.json')
@@ -127,19 +88,13 @@ var tabUpdates = function () {
 
 chrome.runtime.onMessage.addListener(function (req, src, callback) {
   if (req.cmd === 'grabbed') {
-    var article = req.article;
-    article.origin_url = article.origin_url || src.url.split('#')[0];
-    article.compose_organization = article.compose_organization || '第一财经｜CBN';
     chrome.tabs.create({
-      url: investHost + '/draft/columns/_new',
+      url: req.open,
     }, tab => {
-      tabUpdates.add(tab.id, article);
+      tabUpdates.add(tab.id, req.article);
     });
   } else if (req.cmd === 'checkVersion') {
     callback(versionInfo);
-  } else if (req.cmd === 'setHost') {
-    localStorage.setItem(KEY_HOST, req.data);
-    readHost();
   } else if (req.cmd === 'getArticle') {
     var item = tabUpdates.get(src.tab.id);
     item && callback(item.article);
@@ -154,7 +109,7 @@ chrome.pageAction.onClicked.addListener(tab => {
     runAt: 'document_start',
   }, () => {
     chrome.tabs.executeScript(tab.id, {
-      code: 'grab(' + serialize(rule.data) + ')',
+      code: 'grab(' + serialize(rule) + ')',
       runAt: 'document_start',
     });
   });
