@@ -1,4 +1,9 @@
-Hugo Invest Grabber
+Hugo Grabber
 ---
 
-Chrome extension for Hugo Invest: One click to extract article data from defined websites.
+Chrome extension for grab contents from web pages easily.
+
+Features
+---
+* Flexible rules (see <src/rules.js>)
+* Rules can be subscribed and updated automatically

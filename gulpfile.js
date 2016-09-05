@@ -9,6 +9,7 @@ gulp.task('copy', () => (
   gulp.src([
     // 'src/_locales/**',
     'src/images/**',
+    'src/**/*.html',
   ], {base: 'src'})
   .pipe(gulp.dest('dist'))
 ));
@@ -21,7 +22,7 @@ gulp.task('manifest', () => new Promise((resolve, reject) => {
 }));
 
 gulp.task('js', () => {
-  const stream = gulp.src('src/*.js')
+  const stream = gulp.src('src/**/*.js')
   .pipe(uglify().on('error', e => {
     console.log(e);
   }))
@@ -30,7 +31,7 @@ gulp.task('js', () => {
 });
 
 gulp.task('eslint', () => {
-  return gulp.src('src/*.js')
+  return gulp.src('src/**/*.js')
   .pipe(eslint())
   .pipe(eslint.format())
   .pipe(eslint.failAfterError());

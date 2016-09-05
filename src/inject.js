@@ -90,8 +90,10 @@ window.grab = window.grab || function () {
       if (meta.transform) article = meta.transform(article) || article;
       chrome.runtime.sendMessage({
         cmd: 'grabbed',
-        open: meta.open,
-        article: article,
+        data: {
+          open: meta.open,
+          article: article,
+        },
       });
       inProgress = false;
       finish();
