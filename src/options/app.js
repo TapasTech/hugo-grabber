@@ -17,7 +17,9 @@ new Vue({
           var i = _this.list.findIndex(function (listItem) {
             return listItem.id === item.id;
           });
-          if (i < 0) {
+          if (!item.url) {
+            ~i && _this.list.splice(i, 1);
+          } else if (i < 0) {
             _this.list.push(item);
           } else {
             Vue.set(_this.list, i, item);

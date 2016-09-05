@@ -166,6 +166,7 @@
         meta.list.splice(i, 1);
         saveMeta();
       }
+      updateState(id);
       updateTabState();
     }
     function loadAll() {
@@ -185,7 +186,7 @@
       function update() {
         timer = null;
         var items = toUpdate.map(function (id) {
-          return getNormalizedItem(id);
+          return getNormalizedItem(id) || {id: id};
         });
         chrome.runtime.sendMessage({
           cmd: 'updateItems',
