@@ -25,9 +25,9 @@
     }
   },
   "content_scripts": [{
-    "matches": ["http://localhost/*", "*://backend-invest.test.dtcj.com/*", "*://backend-invest.dtcj.com/*"],
+    "matches": ["<all_urls>"],
     "run_at": "document_start",
-    "js": ["common.js", "invest.js"]
+    "js": ["common.js", "injected.js"]
   }],
   "background": {
     "scripts": ["common.js", "rules.js", "events.js"]

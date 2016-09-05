@@ -25,8 +25,10 @@ function getScript(func, args) {
   return ';(' + func.toString() + ').apply(null,' + window.serialize(args || []) + ');';
 }
 
-function editAs(article) {
+function setEdit(article) {
   inject(getScript(function (article) {
+    window._hgi.set('grabbed', article);
+    // DEPRECATED
     window._hgi.set('editAs:columns', article);
   }, [article]));
 }
@@ -44,8 +46,6 @@ chrome.runtime.sendMessage({cmd: 'checkVersion'}, function (ver) {
   ver && setVersion(ver);
 });
 
-chrome.runtime.sendMessage({cmd: 'setHost', data: location.origin});
-
 chrome.runtime.sendMessage({cmd: 'getArticle'}, function (article) {
-  article && editAs(article);
+  article && setEdit(article);
 });

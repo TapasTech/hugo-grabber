@@ -291,7 +291,7 @@
   chrome.pageAction.onClicked.addListener(function (tab) {
     var rule = rules.find(tab.url);
     rule && rule.data && chrome.tabs.executeScript(tab.id, {
-      file: 'inject.js',
+      file: 'grab.js',
       runAt: 'document_start',
     }, function () {
       chrome.tabs.executeScript(tab.id, {
