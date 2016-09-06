@@ -6,10 +6,27 @@
       chrome.pageAction.hide(tab.id);
     }
   }
+  function fetchByXHR(url) {
+    function buildRes(text) {
+      return {
+        text: function () {return text;},
+        json: function () {return JSON.parse(text);},
+      };
+    }
+    return new Promise(function (resolve, reject) {
+      var x = new XMLHttpRequest;
+      x.open('GET', url);
+      x.onloadend = function () {
+        if (x.status > 300) return reject();
+        resolve(buildRes(x.responseText));
+      };
+      x.send();
+    });
+  }
 
   var version = function () {
     // function check() {
-    //   fetch('https://api.github.com/repos/TapasTech/HugoInvestGrabber/releases/latest')
+    //   fetchByXHR('https://api.github.com/repos/TapasTech/HugoInvestGrabber/releases/latest')
     //   .then(function (res) {return res.json();})
     //   .then(function (data) {
     //     var localVersion = info.version.split('.');
@@ -36,7 +53,7 @@
     //   });
     // }
     function init() {
-      fetch('manifest.json')
+      fetchByXHR('/manifest.json')
       .then(function (res) {return res.json();})
       .then(function (data) {
         try {
@@ -58,11 +75,19 @@
   }();
 
   var rules = function () {
+    function getRE(s) {
+      var re = recache[s];
+      if (!re) re = recache[s] = new RegExp(s);
+      return re;
+    }
     function find(url) {
       var rule = cache[url];
       if (rule) return rule;
       rule = rules.find(function (rule) {
-        return !rule.match || rule.match(url);
+        var type = typeof rule.match;
+        if (type === 'string') return getRE(rule.match).test(url);
+        if (type === 'function') return rule.match(url);
+        return !rule.match;
       });
       if (rule) {
         cache[url] = rule;
@@ -73,12 +98,7 @@
       return rule;
     }
     function loadData(id) {
-      var rules;
-      try {
-        rules = (0, eval)(localStorage.getItem(KEY_RULES + ':' + id));
-      } catch (e) {
-        // ignore
-      }
+      var rules = window.deserialize(localStorage.getItem(KEY_RULES + ':' + id));
       if (!Array.isArray(rules)) rules = [];
       return window.parseRules(rules);
     }
@@ -96,7 +116,7 @@
       if (!meta.list) {
         meta.list = [{
           id: 1,
-          url: 'https://backend-invest.test.dtcj.com/node/data/grab-invest.js',
+          url: 'https://backend-invest.test.dtcj.com/node/data/grab-invest.json',
         }];
         // fetch default lists
         setTimeout(checkUpdates);
@@ -123,14 +143,18 @@
       var state = states[id] = states[id] || {};
       if (state.checking) return state.checking;
       updateState(id);
-      return state.checking = fetch(url)
-      .then(function (res) {
-        return res.text();
-      })
+      return state.checking = fetchByXHR(url)
+      .then(function (res) {return res.text();})
       .then(function (data) {
+        data = window.normalizeRules(data, url);
         item.lastCheck = Date.now();
         saveMeta();
         saveData(id, data);
+      })
+      .catch(function (e) {
+        console.warn(e);
+      })
+      .then(function () {
         state.checking = null;
         updateState(id);
         updateTabState();
@@ -215,9 +239,11 @@
     }();
     var KEY_RULES = 'rules';
     var meta = loadMeta();
-    var rules = loadAll();
+    var rules;
     var cache = {};
+    var recache = {};
     var states = {};
+    updateTabState();
     setTimeout(checkUpdates, 20 * 1000);
     return {
       find: find,

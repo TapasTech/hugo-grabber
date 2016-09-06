@@ -1,5 +1,5 @@
 [{
-  match: function (url) {return /^https?:\/\/mp\.weixin\.qq\.com\/s\?/.test(url);},
+  match: '^https?://mp\.weixin\.qq\.com/s\?',
   meta: {
     open: 'https://backend-invest.dtcj.com/draft/columns/_new',
     transform: function (article) {
@@ -30,7 +30,7 @@
       value: function (window) {return window.location.href.split('#')[0];},
     },
     compose_organization: {
-      value: function () {return '第一财经｜CBN';},
+      value: '第一财经｜CBN',
     },
     author: '#post-date+.rich_media_meta_text',
     origin_date: '#post-date',

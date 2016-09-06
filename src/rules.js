@@ -1,30 +1,30 @@
 /**
 * Rules:
 *
-* - match: {String} url => {Boolean}
+* - match: re:string | url:string -> boolean
 *   meta:
-*     open: {String} url
-*     transform: {Object} => {Object}
+*     open: url:string
+*     transform: o:object -> object
 *     image:
-*       el: {String} selector
-*       src: {HTMLImage} img => {String}
+*       el: selector:string
+*       src: img:HTMLImage -> string
 *       maxSize: 1024 * 1024
 *   data:
-*     {String} fieldType1:
-*       - type: {String: ['text' | 'html']} type
-*         value: () => {String}
-*         sel: {String}
-*         transform: {String} => {String}
-*         data: {Array} subdata
-*     {String} fieldType2:
+*     fieldType1:string:
+*       - type: type:string {'text', 'html'}
+*         value: value:string | () -> string
+*         sel: selector:string
+*         transform: v:string -> string
+*         data: subdata:array
+*     fieldType2:string:
 *       - fieldType 3 or 4
 *       - ...
-*     {String} fieldType3:
-*       type: {String: ['text' | 'html']} type
-*       sel: {String}
+*     fieldType3:string:
+*       type: type:string {'text', 'html'}
+*       sel: selector:string
 *       ...
-*     {String} fieldType4:
-*       {String} selector
+*     fieldType4:string:
+*       selector:string
 * - ...
 *
 */

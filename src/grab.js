@@ -47,7 +47,9 @@ window.grab = window.grab || function () {
   }
 
   function extractOne(item, meta) {
-    if (item.value) return item.value(window);
+    if (item.value != null) {
+      return typeof item.value === 'function' ? item.value(window) : item.value;
+    }
     var el = document.querySelector(item.sel);
     var str = el ? (
       item.type === 'html' ? cleanHTML(el.innerHTML, meta) : el.textContent.trim()
