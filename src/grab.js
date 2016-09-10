@@ -67,7 +67,7 @@ window.grab = window.grab || function () {
 
   function grab(rule) {
     if (inProgress) return;
-    var finish = showHint();
+    var hint = window.showHint('正在抓取...');
     var meta = rule.meta;
     var data = rule.data;
     inProgress = true;
@@ -98,32 +98,10 @@ window.grab = window.grab || function () {
         },
       });
       inProgress = false;
-      finish();
+      hint.removeLater(null, '抓取完成！');
     });
   }
 
-  function showHint() {
-    var div = document.createElement('div');
-    div.setAttribute('style', [
-      'position: fixed',
-      'top: 1em',
-      'right: 1em',
-      'padding: 1em',
-      'background: rgba(0,0,0,.6)',
-      'color: white',
-      'font-size: 14px',
-      'font-weight: 300',
-      'border-radius: .5em',
-    ].join(';'));
-    div.innerHTML = '正在抓取...';
-    document.body.appendChild(div);
-    return function () {
-      div.innerHTML = '抓取完成';
-      setTimeout(function () {div.remove();}, 3000);
-    };
-  }
-
   var inProgress;
-
   return grab;
 }();
