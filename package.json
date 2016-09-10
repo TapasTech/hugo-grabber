@@ -3,6 +3,7 @@
   "version": "0.2.5",
   "description": "Grab articles for Hugo Invest.",
   "scripts": {
+    "lint": "gulp eslint",
     "build": "gulp"
   },
   "keywords": [
@@ -14,14 +15,21 @@
   "license": "MIT",
   "devDependencies": {
     "gulp": "^3.9.1",
-    "gulp-replace": "^0.5.4"
+    "gulp-eslint": "^3.0.1",
+    "gulp-uglify": "^2.0.0"
+  },
+  "main": "gulpfile.js",
+  "dependencies": {
+    "eslint": "^3.4.0",
+    "gulp-eslint": "^3.0.1",
+    "gulp-uglify": "^2.0.0"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TapasTech/HugoInvestGrabber.git"
+    "url": "git+https://github.com/TapasTech/hugo-grabber.git"
   },
   "bugs": {
-    "url": "https://github.com/TapasTech/HugoInvestGrabber/issues"
+    "url": "https://github.com/TapasTech/hugo-grabber/issues"
   },
-  "homepage": "https://github.com/TapasTech/HugoInvestGrabber#readme"
+  "homepage": "https://github.com/TapasTech/hugo-grabber#readme"
 }

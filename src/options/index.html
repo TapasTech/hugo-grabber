@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Grabber Options</title>
+  <style>
+    body {
+      font-size: 14px;
+    }
+    h1 {
+      text-align: center;
+    }
+    #app {
+      width: 800px;
+      margin: auto;
+    }
+    .item {
+      display: flex;
+    }
+    .item:hover {
+      background: #eee;
+    }
+    .item > * {
+      padding: .5rem;
+    }
+    .item-link {
+      flex: 1;
+      width: 0;
+      word-break: break-all;
+    }
+    .item-buttons {
+      width: 6rem;
+    }
+    .item-buttons button {
+      width: 100%;
+    }
+    .text-gray {
+      color: gray;
+    }
+  </style>
+  <script src="vue.min.js"></script>
+</head>
+<body>
+  <h1>Grabber Options</h1>
+  <div id="app">
+    <div class="item" v-for="item in list">
+      <div class="item-link">
+        <a :href="item.url" target="_blank" v-text="item.url"></a>
+        <div class="text-gray" v-text="lastCheck(item)"></div>
+      </div>
+      <div class="item-buttons">
+        <button @click="refresh(item)" :disabled="item.checking">Refresh</button>
+        <button @click="remove(item)">Remove</button>
+      </div>
+    </div>
+    <form class="item" @submit.prevent="subscribe">
+      <input class="item-link" type="url" v-model="url" placeholder="Subscribe a new URL...">
+      <div class="item-buttons">
+        <button type="submit" :disabled="!url">Subscribe</button>
+      </div>
+    </form>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
