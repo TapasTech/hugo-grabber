@@ -25,33 +25,27 @@
   }
 
   var version = function () {
-    // function check() {
-    //   fetchByXHR('https://api.github.com/repos/TapasTech/HugoInvestGrabber/releases/latest')
-    //   .then(function (res) {return res.json();})
-    //   .then(function (data) {
-    //     var localVersion = info.version.split('.');
-    //     var remoteVersion = data.tag_name.slice(1).split('.');
-    //     var i = 0;
-    //     while (1) {
-    //       var lv = localVersion[i];
-    //       var rv = remoteVersion[i];
-    //       var nlv = +lv || 0;
-    //       var nrv = +rv || 0;
-    //       if (!lv && !rv || nlv > nrv) return Promise.reject();
-    //       if (nlv < nrv) return data.tag_name;
-    //       i ++;
-    //     }
-    //   })
-    //   .then(function (newVersion) {
-    //     info.name = newVersion;
-    //   }, function () {
-    //     info.name = null;
-    //   })
-    //   .then(function () {
-    //     localStorage.setItem(KEY_VERSION, JSON.stringify(info));
-    //     setTimeout(check, 3 * 60 * 60 * 1000);
-    //   });
-    // }
+    function hasUpdates(local, remote) {
+      local = local.split('.');
+      remote = remote.split('.');
+      for (var i = 0, lv, rv; lv = local[i], rv = remote[i], lv || rv; i ++) {
+        var nlv = +lv || 0;
+        var nrv = +rv || 0;
+        if (nlv !== nrv) return nlv < nrv;
+      }
+      return false;
+    }
+    function check() {
+      fetchByXHR('https://api.github.com/repos/TapasTech/hugo-grabber/releases/latest')
+      .then(function (res) {return res.json();})
+      .then(function (data) {
+        info.update = hasUpdates(info.version, data.tag_name.slice(1)) ? data.tag_name : null;
+      })
+      .then(function () {
+        localStorage.setItem(KEY_VERSION, JSON.stringify(info));
+        setTimeout(check, 3 * 60 * 60 * 1000);
+      });
+    }
     function init() {
       fetchByXHR('/manifest.json')
       .then(function (res) {return res.json();})
@@ -63,7 +57,7 @@
         }
         info = info || {};
         info.version = data.version;
-        // check();
+        check();
       });
     }
     var KEY_VERSION = 'versionInfo';

@@ -1,4 +1,4 @@
-function init() {
+function init(GLOBAL_KEY) {
   function pop(key) {
     var val = data[key];
     delete data[key];
@@ -7,10 +7,10 @@ function init() {
   function set(key, val) {
     data[key] = val;
   }
-  if (window._hgi) return;
+  if (window[GLOBAL_KEY]) return;
   var data = {};
   pop.set = set;
-  window._hgi = pop;
+  window[GLOBAL_KEY] = pop;
 }
 
 function inject(script) {
@@ -22,25 +22,28 @@ function inject(script) {
 }
 
 function getScript(func, args) {
-  return ';(' + func.toString() + ').apply(null,' + window.serialize(args || []) + ');';
+  if (!args) args = [];
+  else if (!Array.isArray(args)) args = [args];
+  return ';(' + func.toString() + ').apply(null,' + window.serialize(args) + ');';
 }
 
 function setEdit(article) {
-  inject(getScript(function (article) {
-    window._hgi.set('grabbed', article);
+  inject(getScript(function (GLOBAL_KEY, article) {
+    window[GLOBAL_KEY].set('grabbed', article);
     // DEPRECATED
-    window._hgi.set('editAs:columns', article);
-  }, [article]));
+    window[GLOBAL_KEY].set('editAs:columns', article);
+  }, [GLOBAL_KEY, article]));
 }
 
 function setVersion(ver) {
-  ver && inject(getScript(function (ver) {
-    window._hgi.set('version', ver.version);
-    ver.name && window._hgi.set('newVersion', ver.name);
-  }, [ver]));
+  ver && inject(getScript(function (GLOBAL_KEY, ver) {
+    window[GLOBAL_KEY].set('version', ver.version);
+    ver.name && window[GLOBAL_KEY].set('newVersion', ver.name);
+  }, [GLOBAL_KEY, ver]));
 }
 
-inject(getScript(init));
+var GLOBAL_KEY = '_hgi';
+inject(getScript(init, [GLOBAL_KEY]));
 
 chrome.runtime.sendMessage({cmd: 'checkVersion'}, function (ver) {
   ver && setVersion(ver);
