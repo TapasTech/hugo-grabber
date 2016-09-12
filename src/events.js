@@ -39,7 +39,8 @@
       fetchByXHR('https://api.github.com/repos/TapasTech/hugo-grabber/releases/latest')
       .then(function (res) {return res.json();})
       .then(function (data) {
-        info.update = hasUpdates(info.version, data.tag_name.slice(1)) ? data.tag_name : null;
+        var latest = data.tag_name.slice(1);
+        info.update = hasUpdates(info.version, latest) ? latest : null;
       })
       .then(function () {
         localStorage.setItem(KEY_VERSION, JSON.stringify(info));
