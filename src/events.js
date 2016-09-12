@@ -190,7 +190,7 @@
     }
     function loadAll() {
       return meta.list.reduce(function (res, item) {
-        return res.concat(loadData(item.id));
+        return item.disabled ? res : res.concat(loadData(item.id));
       }, []);
     }
     function normalize(item) {
@@ -200,6 +200,24 @@
     }
     function getNormalizedItem(id) {
       return normalize(getItem(id));
+    }
+    function updateMeta(data) {
+      var item = getItem(data.id);
+      var changed = false;
+      [
+        'disabled',
+      ].forEach(function (key) {
+        var value = data[key];
+        if (value != null) {
+          item[key] = value;
+          changed = true;
+        }
+      });
+      if (changed) {
+        updateState(data.id);
+        updateTabState();
+        saveMeta();
+      }
     }
     var updateState = function () {
       function update() {
@@ -244,6 +262,7 @@
       find: find,
       remove: remove,
       update: update,
+      updateMeta: updateMeta,
       item: getNormalizedItem,
       list: function () {return meta.list.map(normalize);},
       subscribe: function (url) {
@@ -296,6 +315,9 @@
     },
     updateRule: function (id) {
       rules.update(id);
+    },
+    updateRuleMeta: function (meta) {
+      meta && rules.updateMeta(meta);
     },
     removeRule: function (id) {
       rules.remove(id);

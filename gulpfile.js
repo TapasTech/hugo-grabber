@@ -1,7 +1,8 @@
 const fs = require('fs');
 const gulp = require('gulp');
-const uglify = require('gulp-uglify');
 const eslint = require('gulp-eslint');
+const uglify = require('gulp-uglify');
+const cssnano = require('gulp-cssnano');
 const pkg = require('./package.json');
 const manifest = require('./src/manifest.json');
 
@@ -24,7 +25,7 @@ gulp.task('manifest', ['copy'], () => new Promise((resolve, reject) => {
 }));
 
 gulp.task('js', () => {
-  const stream = gulp.src([
+  return gulp.src([
     'src/**/*.js',
     '!src/**/*.min.js',
   ])
@@ -32,7 +33,12 @@ gulp.task('js', () => {
     console.log(e);
   }))
   .pipe(gulp.dest('dist'));
-  return stream;
+});
+
+gulp.task('css', () => {
+  return gulp.src('src/**/*.css')
+  .pipe(cssnano())
+  .pipe(gulp.dest('dist'));
 });
 
 gulp.task('eslint', () => {
@@ -45,4 +51,4 @@ gulp.task('eslint', () => {
   .pipe(eslint.failAfterError());
 });
 
-gulp.task('default', ['copy', 'js', 'manifest']);
+gulp.task('default', ['copy', 'js', 'css', 'manifest']);

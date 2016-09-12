@@ -1,0 +1,47 @@
+body {
+  font-size: 14px;
+}
+h1 {
+  text-align: center;
+}
+#app {
+  width: 800px;
+  margin: auto;
+}
+.item {
+  display: flex;
+}
+.item a {
+  color: dodgerblue;
+}
+.item.disabled {
+  background: #eee;
+}
+.item.disabled a {
+  color: gray;
+}
+.item:hover {
+  outline: 1px solid #bbf;
+}
+.item > * {
+  padding: .5rem;
+}
+.item-link {
+  flex: 1;
+  width: 0;
+  word-break: break-all;
+}
+.item-buttons {
+  width: 8rem;
+  clear: both;
+}
+.item-buttons > * {
+  float: left;
+  width: 50%;
+}
+.item-buttons > .large {
+  width: 100%;
+}
+.text-gray {
+  color: gray;
+}
