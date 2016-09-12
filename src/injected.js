@@ -53,16 +53,24 @@
         'font-weight: 300',
         'border-radius: .5em',
         'z-index: 20000',
+        'opacity: 0',
+        'transition: opacity .3s',
       ].join(';'));
       set(msg);
       div.addEventListener('click', remove);
       (document.body || document.documentElement).appendChild(div);
+      setTimeout(function () {
+        div.style.opacity = 1;
+      });
     }
     function set(msg) {
       div.innerHTML = msg;
     }
     function remove() {
-      div.remove();
+      div.style.opacity = 0;
+      setTimeout(function () {
+        div.remove();
+      }, 300);
     }
     function removeLater(delay, msg) {
       msg && set(msg);
