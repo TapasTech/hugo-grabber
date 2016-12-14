@@ -1,6 +1,6 @@
 {
   "name": "grabber",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Grab articles for Hugo Invest.",
   "scripts": {
     "lint": "gulp eslint",
