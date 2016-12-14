@@ -24,26 +24,28 @@ window.grab = window.grab || function () {
     if (!imageRule.el) return div.innerHTML;
     var els = typeof imageRule.el === 'string' ? div.querySelectorAll(imageRule.el) : imageRule.el(div);
     return Promise.all(Array.prototype.map.call(els, function (img) {
-      return fetch(imageRule.src(img))
-      .then(function (res) {return res.blob();})
-      .then(function (blob) {return blob.size > imageRule.maxSize ? Promise.reject() : blob;})
-      .then(function (blob) {
-        return new Promise(function (resolve, reject) {
-          var reader = new FileReader;
-          reader.onload = function () {
-            var image = new Image;
-            image.src = this.result;
-            img.parentNode.replaceChild(image, img);
-            resolve();
-          };
-          reader.onerror = function () {
-            reject();
-          };
-          reader.readAsDataURL(blob);
+      return new Promise(function (resolve, reject) {
+        chrome.runtime.sendMessage({
+          cmd: 'url2dataUrl',
+          data: {
+            url: imageRule.src(img),
+            maxSize: imageRule.maxSize,
+          },
+        }, function (res) {
+          res.error ? reject(res.error) : resolve(res.data);
         });
       })
-      .catch(function () {img.remove();});
-    })).then(function () {return div.innerHTML;});
+      .then(function (url) {
+        var image = new Image;
+        image.src = url;
+        img.parentNode.replaceChild(image, img);
+      })
+      .catch(function (err) {
+        console.error(err);
+        img.remove();
+      });
+    }))
+    .then(function () {return div.innerHTML;});
   }
 
   function extractOne(item, meta) {

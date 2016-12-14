@@ -4,7 +4,8 @@
   "description": "Grab articles for Hugo Invest.",
   "scripts": {
     "lint": "gulp eslint",
-    "build": "gulp"
+    "build": "gulp",
+    "dev": "gulp watch"
   },
   "keywords": [
     "grab",
@@ -15,8 +16,10 @@
   "license": "MIT",
   "devDependencies": {
     "gulp": "^3.9.1",
+    "gulp-cssnano": "^2.1.2",
     "gulp-eslint": "^3.0.1",
-    "gulp-uglify": "^2.0.0"
+    "gulp-uglify": "^2.0.0",
+    "vue": "^2.1.6"
   },
   "main": "gulpfile.js",
   "dependencies": {

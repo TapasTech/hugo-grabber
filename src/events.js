@@ -39,7 +39,8 @@
       fetchByXHR('https://api.github.com/repos/TapasTech/hugo-grabber/releases/latest')
       .then(function (res) {return res.json();})
       .then(function (data) {
-        info.update = hasUpdates(info.version, data.tag_name.slice(1)) ? data.tag_name : null;
+        var latest = data.tag_name.slice(1);
+        info.update = hasUpdates(info.version, latest) ? latest : null;
       })
       .then(function () {
         localStorage.setItem(KEY_VERSION, JSON.stringify(info));
@@ -189,7 +190,7 @@
     }
     function loadAll() {
       return meta.list.reduce(function (res, item) {
-        return res.concat(loadData(item.id));
+        return item.disabled ? res : res.concat(loadData(item.id));
       }, []);
     }
     function normalize(item) {
@@ -199,6 +200,24 @@
     }
     function getNormalizedItem(id) {
       return normalize(getItem(id));
+    }
+    function updateMeta(data) {
+      var item = getItem(data.id);
+      var changed = false;
+      [
+        'disabled',
+      ].forEach(function (key) {
+        var value = data[key];
+        if (value != null) {
+          item[key] = value;
+          changed = true;
+        }
+      });
+      if (changed) {
+        updateState(data.id);
+        updateTabState();
+        saveMeta();
+      }
     }
     var updateState = function () {
       function update() {
@@ -243,6 +262,7 @@
       find: find,
       remove: remove,
       update: update,
+      updateMeta: updateMeta,
       item: getNormalizedItem,
       list: function () {return meta.list.map(normalize);},
       subscribe: function (url) {
@@ -296,11 +316,42 @@
     updateRule: function (id) {
       rules.update(id);
     },
+    updateRuleMeta: function (meta) {
+      meta && rules.updateMeta(meta);
+    },
     removeRule: function (id) {
       rules.remove(id);
     },
     subscribe: function (url) {
       rules.subscribe(url);
+    },
+    url2dataUrl: function (data, _src, callback) {
+      fetch(data.url)
+      .then(function (res) {return res.blob();})
+      .then(function (blob) {
+        return blob.size > data.maxSize ? Promise.reject('size too large') : blob;
+      }, function (err) {
+        return Promise.reject(err.toString());
+      })
+      .then(function (blob) {
+        return new Promise(function (resolve, reject) {
+          var reader = new FileReader;
+          reader.onload = function () {
+            resolve(this.result);
+          };
+          reader.onerror = function () {
+            reject('read as dataURL error');
+          };
+          reader.readAsDataURL(blob);
+        });
+      })
+      .then(function (data) {
+        return {data: data};
+      }, function (error) {
+        return {error: error};
+      })
+      .then(callback);
+      return true;
     },
   };
   chrome.runtime.onMessage.addListener(function (req, src, callback) {

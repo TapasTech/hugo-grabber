@@ -56,5 +56,14 @@ new Vue({
       var d = new Date(item.lastCheck);
       return 'Last updated at: ' + d.toLocaleTimeString();
     },
+    switchStatus: function (item) {
+      chrome.runtime.sendMessage({
+        cmd: 'updateRuleMeta',
+        data: {
+          id: item.id,
+          disabled: !item.disabled,
+        },
+      });
+    },
   },
 });

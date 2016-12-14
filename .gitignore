@@ -1,6 +1,7 @@
 dist
 node_modules
 *.log
+*.lock
 *.crx
 *.pem
 resources/*.json
