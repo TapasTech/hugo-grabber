@@ -325,6 +325,34 @@
     subscribe: function (url) {
       rules.subscribe(url);
     },
+    url2dataUrl: function (data, _src, callback) {
+      fetch(data.url)
+      .then(function (res) {return res.blob();})
+      .then(function (blob) {
+        return blob.size > data.maxSize ? Promise.reject('size too large') : blob;
+      }, function (err) {
+        return Promise.reject(err.toString());
+      })
+      .then(function (blob) {
+        return new Promise(function (resolve, reject) {
+          var reader = new FileReader;
+          reader.onload = function () {
+            resolve(this.result);
+          };
+          reader.onerror = function () {
+            reject('read as dataURL error');
+          };
+          reader.readAsDataURL(blob);
+        });
+      })
+      .then(function (data) {
+        return {data: data};
+      }, function (error) {
+        return {error: error};
+      })
+      .then(callback);
+      return true;
+    },
   };
   chrome.runtime.onMessage.addListener(function (req, src, callback) {
     var handle = handlers[req.cmd];

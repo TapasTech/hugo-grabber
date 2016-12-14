@@ -31,7 +31,7 @@
         return res;
       }, {});
     }
-    if (reFile.test(url)) return str;
+    if (reJSFile.test(url)) return str;
     try {
       var list = JSON.parse(str);
     } catch (e) {
@@ -47,7 +47,7 @@
       // ignore
     }
   }
-  var reFile = /^file:\/\//;
+  var reJSFile = /^file:\/\/.*?\.js$/;
   var reFunc = /^(\w+)\((.*?)\)$/;
   window.serialize = serialize;
   window.deserialize = deserialize;

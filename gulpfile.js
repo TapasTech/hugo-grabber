@@ -29,8 +29,9 @@ gulp.task('js', () => {
     'src/**/*.js',
     '!src/**/*.min.js',
   ])
-  .pipe(uglify().on('error', e => {
+  .pipe(uglify().on('error', function (e) {
     console.log(e);
+    this.emit('end');
   }))
   .pipe(gulp.dest('dist'));
 });
@@ -52,3 +53,11 @@ gulp.task('eslint', () => {
 });
 
 gulp.task('default', ['copy', 'js', 'css', 'manifest']);
+
+gulp.task('watch', ['default'], () => {
+  gulp.watch([
+    'src/**/*.js',
+    '!src/**/*.min.js',
+  ], ['js']);
+  gulp.watch('src/**/*.css', ['css']);
+});
