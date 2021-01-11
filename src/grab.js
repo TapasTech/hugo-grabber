@@ -95,6 +95,9 @@ window.grab = window.grab || function () {
       chrome.runtime.sendMessage({
         cmd: 'grabbed',
         data: {
+          // open: 'http://localhost:3003/draft/new/columns/_new',
+          // open: 'http://localhost:8080/admin/informations/new',
+          // open: 'https://backend-invest-test.cbndata.org/draft/new/columns/_new',
           open: meta.open,
           article: article,
         },

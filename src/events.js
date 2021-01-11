@@ -111,6 +111,8 @@
       if (!meta.list) {
         meta.list = [{
           id: 1,
+          // url: 'https://assets.cbndata.org/cbndata-cms-fe/grab.json',
+          // url: 'https://assets.cbndata.org/invest/grab.json',
           url: 'https://backend-invest.test.dtcj.com/node/data/grab-invest.json',
         }];
         // fetch default lists
